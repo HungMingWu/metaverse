@@ -41,7 +41,7 @@ using namespace std;
 namespace libbitcoin {
 namespace consensus {
 
-static BC_CONSTEXPR unsigned int min_tx_fee = 10000;
+static constexpr unsigned int min_tx_fee = 10000;
 
 // tuples: (priority, fee_per_kb, fee, transaction_ptr)
 typedef boost::tuple<double, double, uint64_t, miner::transaction_ptr> transaction_priority;

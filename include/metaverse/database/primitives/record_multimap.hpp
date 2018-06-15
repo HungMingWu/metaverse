@@ -32,7 +32,7 @@ namespace libbitcoin {
 namespace database {
 
 template <typename KeyType>
-BC_CONSTEXPR size_t hash_table_multimap_record_size()
+constexpr size_t hash_table_multimap_record_size()
 {
     return hash_table_record_size<KeyType>(sizeof(array_index));
 }

@@ -116,12 +116,12 @@ typedef bc::chain::output tx_output_type;
 /**
  * The minimum safe length of a seed in bits (multiple of 8).
  */
-BC_CONSTEXPR size_t minimum_seed_bits = 128;
+constexpr size_t minimum_seed_bits = 128;
 
 /**
  * The minimum safe length of a seed in bytes (16).
  */
-BC_CONSTEXPR size_t minimum_seed_size = minimum_seed_bits / bc::byte_bits;
+constexpr size_t minimum_seed_size = minimum_seed_bits / bc::byte_bits;
 
 /**
  * Suppported output encoding engines.

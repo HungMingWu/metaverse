@@ -31,9 +31,9 @@
 namespace libbitcoin {
 namespace server {
 
-static BC_CONSTEXPR size_t code_size = sizeof(uint32_t);
-static BC_CONSTEXPR size_t index_size = sizeof(uint32_t);
-static BC_CONSTEXPR size_t point_size = hash_size + sizeof(uint32_t);
+static constexpr size_t code_size = sizeof(uint32_t);
+static constexpr size_t index_size = sizeof(uint32_t);
+static constexpr size_t point_size = hash_size + sizeof(uint32_t);
 
 // fetch_history stuff
 

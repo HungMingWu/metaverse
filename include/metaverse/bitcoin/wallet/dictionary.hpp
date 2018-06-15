@@ -31,7 +31,7 @@ namespace wallet {
 /**
  * A valid mnemonic dictionary has exactly this many words.
  */
-static BC_CONSTEXPR size_t dictionary_size = 2048;
+static constexpr size_t dictionary_size = 2048;
 
 /**
  * A dictionary for creating mnemonics.

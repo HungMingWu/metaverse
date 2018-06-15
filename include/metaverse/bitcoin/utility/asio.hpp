@@ -68,7 +68,7 @@ typedef std::shared_ptr<acceptor> acceptor_ptr;
 typedef std::shared_ptr<resolver> resolver_ptr;
 typedef std::shared_ptr<query> query_ptr;
 
-BC_CONSTEXPR int max_connections = boost::asio::socket_base::max_connections;
+constexpr int max_connections = boost::asio::socket_base::max_connections;
 
 } // namespace asio
 } // namespace libbitcoin

@@ -30,29 +30,29 @@
 namespace libbitcoin {
 
 /// Private key:
-BC_CONSTEXPR size_t ec_secret_size = 32;
+constexpr size_t ec_secret_size = 32;
 typedef byte_array<ec_secret_size> ec_secret;
 
 /// Compressed public key:
-BC_CONSTEXPR size_t ec_compressed_size = 33;
+constexpr size_t ec_compressed_size = 33;
 typedef byte_array<ec_compressed_size> ec_compressed;
 
 typedef std::vector<ec_compressed> point_list;
 
 /// Uncompressed public key:
-BC_CONSTEXPR size_t ec_uncompressed_size = 65;
+constexpr size_t ec_uncompressed_size = 65;
 typedef byte_array<ec_uncompressed_size> ec_uncompressed;
 
 // Parsed ECDSA signature:
-BC_CONSTEXPR size_t ec_signature_size = 64;
+constexpr size_t ec_signature_size = 64;
 typedef byte_array<ec_signature_size> ec_signature;
 
 // DER encoded signature:
-BC_CONSTEXPR size_t max_der_signature_size = 72;
+constexpr size_t max_der_signature_size = 72;
 typedef data_chunk der_signature;
 
 /// DER encoded signature with sighash byte for input endorsement:
-BC_CONSTEXPR size_t max_endorsement_size = 73;
+constexpr size_t max_endorsement_size = 73;
 typedef data_chunk endorsement;
 
 /// Recoverable ecdsa signature for message signing:
@@ -62,13 +62,13 @@ struct BC_API recoverable_signature
     uint8_t recovery_id;
 };
 
-BC_CONSTEXPR ec_compressed null_compressed_point =
+constexpr ec_compressed null_compressed_point =
 {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
 
-BC_CONSTEXPR ec_uncompressed null_uncompressed_point =
+constexpr ec_uncompressed null_uncompressed_point =
 {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

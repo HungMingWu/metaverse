@@ -54,7 +54,7 @@ public:
 
 public:
 /// Constant for logging file open mode (append output).
-static BC_CONSTEXPR std::ofstream::openmode log_open_mode =
+static constexpr std::ofstream::openmode log_open_mode =
     std::ofstream::out | std::ofstream::app;
 
 private:

@@ -25,7 +25,7 @@
 namespace libbitcoin {
 namespace chain {
 
-static BC_CONSTEXPR uint8_t max_offset = hash_size + sizeof(uint32_t);
+static constexpr uint8_t max_offset = hash_size + sizeof(uint32_t);
 
 point_iterator::point_iterator(const point& value)
   : point_(value), offset_(0)

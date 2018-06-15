@@ -35,14 +35,14 @@ namespace database {
 using namespace boost::filesystem;
 using namespace bc::chain;
 
-BC_CONSTEXPR size_t number_buckets = 97210744;
-BC_CONSTEXPR size_t header_size = record_hash_table_header_size(number_buckets);
-BC_CONSTEXPR size_t initial_lookup_file_size = header_size + minimum_records_size;
+constexpr size_t number_buckets = 97210744;
+constexpr size_t header_size = record_hash_table_header_size(number_buckets);
+constexpr size_t initial_lookup_file_size = header_size + minimum_records_size;
 
-BC_CONSTEXPR size_t record_size = hash_table_multimap_record_size<short_hash>();
+constexpr size_t record_size = hash_table_multimap_record_size<short_hash>();
 
-BC_CONSTEXPR size_t value_size = 1 + 36 + 4 + 8;
-BC_CONSTEXPR size_t row_record_size = hash_table_record_size<hash_digest>(value_size);
+constexpr size_t value_size = 1 + 36 + 4 + 8;
+constexpr size_t row_record_size = hash_table_record_size<hash_digest>(value_size);
 
 history_database::history_database(const path& lookup_filename,
     const path& rows_filename, std::shared_ptr<shared_mutex> mutex)

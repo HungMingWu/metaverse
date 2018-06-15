@@ -31,7 +31,7 @@
 namespace libbitcoin {
 namespace chain {
 	
-BC_CONSTEXPR size_t ETP_FIX_SIZE = 8;
+constexpr size_t ETP_FIX_SIZE = 8;
 
 class BC_API etp
 {

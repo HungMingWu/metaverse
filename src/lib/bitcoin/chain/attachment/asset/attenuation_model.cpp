@@ -28,8 +28,8 @@
 namespace libbitcoin {
 namespace chain {
 
-static BC_CONSTEXPR uint64_t max_inflation_rate = 100000;
-static BC_CONSTEXPR uint64_t max_unlock_number = 100;
+static constexpr uint64_t max_inflation_rate = 100000;
+static constexpr uint64_t max_unlock_number = 100;
 
 namespace {
     const char* LOG_HEADER{"attenuation_model"};

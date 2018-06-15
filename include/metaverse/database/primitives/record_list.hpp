@@ -30,7 +30,7 @@ namespace libbitcoin {
 namespace database {
 
 // used by test and tools only.
-BC_CONSTEXPR size_t record_list_offset = sizeof(array_index);
+constexpr size_t record_list_offset = sizeof(array_index);
 
 /// This is a one-way linked list with a next value containing the index of the
 /// subsequent record. Records can be dropped by forgetting an index, and

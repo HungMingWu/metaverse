@@ -37,9 +37,9 @@ template <typename KeyType>
 class record_row
 {
 public:
-    static BC_CONSTEXPR size_t index_size = sizeof(array_index);
-    static BC_CONSTEXPR size_t key_size = std::tuple_size<KeyType>::value;
-    static BC_CONSTEXPR file_offset value_begin = key_size + index_size;
+    static constexpr size_t index_size = sizeof(array_index);
+    static constexpr size_t key_size = std::tuple_size<KeyType>::value;
+    static constexpr file_offset value_begin = key_size + index_size;
 
     record_row(record_manager& manager, array_index index);
 

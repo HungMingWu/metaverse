@@ -24,18 +24,6 @@
 #include <cstdint>
 #include <limits>
 
-// CTP_Nov2013 implements noexcept but unfortunately VC12 and CTP_Nov2013
-// both identify as _MSC_VER = 1800, otherwise we could include CTP_Nov2013.
-#if defined(_MSC_VER) && (_MSC_VER <= 1800)
-    #define BC_NOEXCEPT _NOEXCEPT
-    #define BC_CONSTEXPR const
-    #define BC_CONSTFUNC inline
-#else
-    #define BC_NOEXCEPT noexcept
-    #define BC_CONSTEXPR constexpr
-    #define BC_CONSTFUNC constexpr
-#endif
-
 // TODO: prefix names with BC_
 #ifdef _MSC_VER
     #define MIN_INT64 INT64_MIN

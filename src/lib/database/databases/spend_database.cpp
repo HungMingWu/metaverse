@@ -34,12 +34,12 @@ namespace database {
 using namespace boost::filesystem;
 using namespace bc::chain;
 
-BC_CONSTEXPR size_t number_buckets = 228110589;
-BC_CONSTEXPR size_t header_size = record_hash_table_header_size(number_buckets);
-BC_CONSTEXPR size_t initial_map_file_size = header_size + minimum_records_size;
+constexpr size_t number_buckets = 228110589;
+constexpr size_t header_size = record_hash_table_header_size(number_buckets);
+constexpr size_t initial_map_file_size = header_size + minimum_records_size;
 
-BC_CONSTEXPR size_t value_size = std::tuple_size<chain::point>::value;
-BC_CONSTEXPR size_t record_size = hash_table_record_size<chain::point>(value_size);
+constexpr size_t value_size = std::tuple_size<chain::point>::value;
+constexpr size_t record_size = hash_table_record_size<chain::point>(value_size);
 
 spend_database::spend_database(const path& filename,
     std::shared_ptr<shared_mutex> mutex)

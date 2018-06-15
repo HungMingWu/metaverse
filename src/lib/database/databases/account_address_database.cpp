@@ -35,16 +35,16 @@ namespace database {
 using namespace boost::filesystem;
 using namespace bc::chain;
 
-BC_CONSTEXPR size_t number_buckets = 9997;
-BC_CONSTEXPR size_t header_size = record_hash_table_header_size(number_buckets);
-BC_CONSTEXPR size_t initial_lookup_file_size = header_size + minimum_records_size;
+constexpr size_t number_buckets = 9997;
+constexpr size_t header_size = record_hash_table_header_size(number_buckets);
+constexpr size_t initial_lookup_file_size = header_size + minimum_records_size;
 
-BC_CONSTEXPR size_t record_size = hash_table_multimap_record_size<short_hash>();
+constexpr size_t record_size = hash_table_multimap_record_size<short_hash>();
 
-BC_CONSTEXPR size_t address_db_size = ADDRESS_NAME_FIX_SIZE + ADDRESS_PRV_KEY_FIX_SIZE + ADDRESS_PUB_KEY_FIX_SIZE \
+constexpr size_t address_db_size = ADDRESS_NAME_FIX_SIZE + ADDRESS_PRV_KEY_FIX_SIZE + ADDRESS_PUB_KEY_FIX_SIZE \
     + ADDRESS_HD_INDEX_FIX_SIZE + ADDRESS_BALANCE_FIX_SIZE + ADDRESS_ALIAS_FIX_SIZE + ADDRESS_ADDRESS_FIX_SIZE
     + ADDRESS_STATUS_FIX_SIZE; // 222 -- refer account_address.hpp
-BC_CONSTEXPR size_t row_record_size = hash_table_record_size<hash_digest>(address_db_size);
+constexpr size_t row_record_size = hash_table_record_size<hash_digest>(address_db_size);
 
 account_address_database::account_address_database(const path& lookup_filename,
     const path& rows_filename, std::shared_ptr<shared_mutex> mutex)

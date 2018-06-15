@@ -31,11 +31,11 @@
 namespace libbitcoin {
 namespace chain {
 	
-BC_CONSTEXPR size_t  BLOCKCHAIN_MESSAGE_FIX_SIZE = 256;
+constexpr size_t  BLOCKCHAIN_MESSAGE_FIX_SIZE = 256;
 class BC_API blockchain_message
 {
 public:
-    //BC_CONSTEXPR static size_t blockchain_message_FIX_SIZE = 64;
+    //constexpr static size_t blockchain_message_FIX_SIZE = 64;
 
 	blockchain_message();
 	blockchain_message(std::string content);

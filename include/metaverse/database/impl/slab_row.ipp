@@ -37,9 +37,9 @@ template <typename KeyType>
 class slab_row
 {
 public:
-    static BC_CONSTEXPR size_t position_size = sizeof(file_offset);
-    static BC_CONSTEXPR size_t key_size = std::tuple_size<KeyType>::value;
-    static BC_CONSTEXPR file_offset value_begin = key_size + position_size;
+    static constexpr size_t position_size = sizeof(file_offset);
+    static constexpr size_t key_size = std::tuple_size<KeyType>::value;
+    static constexpr file_offset value_begin = key_size + position_size;
 
     slab_row(slab_manager& manager, file_offset position);
 

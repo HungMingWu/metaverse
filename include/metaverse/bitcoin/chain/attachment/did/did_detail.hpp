@@ -32,10 +32,10 @@
 namespace libbitcoin {
 namespace chain {
 
-BC_CONSTEXPR size_t DID_DETAIL_SYMBOL_FIX_SIZE = 64;
-BC_CONSTEXPR size_t DID_DETAIL_ADDRESS_FIX_SIZE = 64;
+constexpr size_t DID_DETAIL_SYMBOL_FIX_SIZE = 64;
+constexpr size_t DID_DETAIL_ADDRESS_FIX_SIZE = 64;
 
-BC_CONSTEXPR size_t DID_DETAIL_FIX_SIZE = DID_DETAIL_SYMBOL_FIX_SIZE
+constexpr size_t DID_DETAIL_FIX_SIZE = DID_DETAIL_SYMBOL_FIX_SIZE
             + DID_DETAIL_ADDRESS_FIX_SIZE;
 
 class BC_API did_detail

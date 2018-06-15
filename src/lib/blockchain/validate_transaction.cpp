@@ -37,7 +37,7 @@
 namespace libbitcoin {
 namespace blockchain {
 
-static BC_CONSTEXPR unsigned int min_tx_fee = 10000;
+static constexpr unsigned int min_tx_fee = 10000;
 
 using namespace chain;
 using namespace std::placeholders;

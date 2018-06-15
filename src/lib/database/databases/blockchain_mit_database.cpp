@@ -31,9 +31,9 @@ namespace database {
 
 using namespace boost::filesystem;
 
-BC_CONSTEXPR size_t number_buckets = 999983;
-BC_CONSTEXPR size_t header_size = slab_hash_table_header_size(number_buckets);
-BC_CONSTEXPR size_t initial_map_file_size = header_size + minimum_slabs_size;
+constexpr size_t number_buckets = 999983;
+constexpr size_t header_size = slab_hash_table_header_size(number_buckets);
+constexpr size_t initial_map_file_size = header_size + minimum_slabs_size;
 
 blockchain_mit_database::blockchain_mit_database(const path& map_filename,
     std::shared_ptr<shared_mutex> mutex)

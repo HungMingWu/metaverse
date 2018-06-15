@@ -33,14 +33,14 @@
 namespace libbitcoin {
 namespace chain {
 
-BC_CONSTEXPR size_t ASSET_DETAIL_SYMBOL_FIX_SIZE = 64;
-BC_CONSTEXPR size_t ASSET_DETAIL_MAX_SUPPLY_FIX_SIZE = 8;
-BC_CONSTEXPR size_t ASSET_DETAIL_ASSET_TYPE_FIX_SIZE = 4;
-BC_CONSTEXPR size_t ASSET_DETAIL_ISSUER_FIX_SIZE = 64;
-BC_CONSTEXPR size_t ASSET_DETAIL_ADDRESS_FIX_SIZE = 64;
-BC_CONSTEXPR size_t ASSET_DETAIL_DESCRIPTION_FIX_SIZE = 64;
+constexpr size_t ASSET_DETAIL_SYMBOL_FIX_SIZE = 64;
+constexpr size_t ASSET_DETAIL_MAX_SUPPLY_FIX_SIZE = 8;
+constexpr size_t ASSET_DETAIL_ASSET_TYPE_FIX_SIZE = 4;
+constexpr size_t ASSET_DETAIL_ISSUER_FIX_SIZE = 64;
+constexpr size_t ASSET_DETAIL_ADDRESS_FIX_SIZE = 64;
+constexpr size_t ASSET_DETAIL_DESCRIPTION_FIX_SIZE = 64;
 
-BC_CONSTEXPR size_t ASSET_DETAIL_FIX_SIZE = ASSET_DETAIL_SYMBOL_FIX_SIZE
+constexpr size_t ASSET_DETAIL_FIX_SIZE = ASSET_DETAIL_SYMBOL_FIX_SIZE
             + ASSET_DETAIL_MAX_SUPPLY_FIX_SIZE
             + ASSET_DETAIL_ASSET_TYPE_FIX_SIZE
             + ASSET_DETAIL_ISSUER_FIX_SIZE
@@ -52,8 +52,8 @@ class BC_API asset_detail
 public:
     typedef std::vector<asset_detail> list;
 
-    static BC_CONSTEXPR uint8_t forbidden_secondaryissue_threshold = 0;
-    static BC_CONSTEXPR uint8_t freely_secondaryissue_threshold = 127;
+    static constexpr uint8_t forbidden_secondaryissue_threshold = 0;
+    static constexpr uint8_t freely_secondaryissue_threshold = 127;
 
     asset_detail();
     asset_detail(

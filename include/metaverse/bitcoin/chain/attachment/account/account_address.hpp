@@ -32,14 +32,14 @@
 namespace libbitcoin {
 namespace chain {
 
-BC_CONSTEXPR size_t ADDRESS_NAME_FIX_SIZE = 64;
-BC_CONSTEXPR size_t ADDRESS_PRV_KEY_FIX_SIZE = 70;
-BC_CONSTEXPR size_t ADDRESS_PUB_KEY_FIX_SIZE = 70;
-BC_CONSTEXPR size_t ADDRESS_HD_INDEX_FIX_SIZE = 4;
-BC_CONSTEXPR size_t ADDRESS_BALANCE_FIX_SIZE = 8;
-BC_CONSTEXPR size_t ADDRESS_ALIAS_FIX_SIZE = 64;
-BC_CONSTEXPR size_t ADDRESS_ADDRESS_FIX_SIZE = 48;
-BC_CONSTEXPR size_t ADDRESS_STATUS_FIX_SIZE = 1;
+constexpr size_t ADDRESS_NAME_FIX_SIZE = 64;
+constexpr size_t ADDRESS_PRV_KEY_FIX_SIZE = 70;
+constexpr size_t ADDRESS_PUB_KEY_FIX_SIZE = 70;
+constexpr size_t ADDRESS_HD_INDEX_FIX_SIZE = 4;
+constexpr size_t ADDRESS_BALANCE_FIX_SIZE = 8;
+constexpr size_t ADDRESS_ALIAS_FIX_SIZE = 64;
+constexpr size_t ADDRESS_ADDRESS_FIX_SIZE = 48;
+constexpr size_t ADDRESS_STATUS_FIX_SIZE = 1;
 
 /// used for store account_address related information
 enum account_address_status : uint8_t

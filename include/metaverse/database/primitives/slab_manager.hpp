@@ -30,8 +30,8 @@
 namespace libbitcoin {
 namespace database {
 
-BC_CONSTEXPR size_t minimum_slabs_size = sizeof(file_offset);
-BC_CONSTFUNC size_t slab_hash_table_header_size(size_t buckets)
+constexpr size_t minimum_slabs_size = sizeof(file_offset);
+constexpr size_t slab_hash_table_header_size(size_t buckets)
 {
     return sizeof(file_offset) + minimum_slabs_size * buckets;
 }

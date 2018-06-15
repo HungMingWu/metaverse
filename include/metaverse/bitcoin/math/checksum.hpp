@@ -31,7 +31,7 @@
 
 namespace libbitcoin {
 
-static BC_CONSTEXPR size_t checksum_size = sizeof(uint32_t);
+static constexpr size_t checksum_size = sizeof(uint32_t);
 
 #define WRAP_SIZE(payload_size) (payload_size + checksum_size + 1)
 #define UNWRAP_SIZE(payload_size) (payload_size - checksum_size - 1)

@@ -28,9 +28,9 @@
 
 namespace libbitcoin {
 
-BC_CONSTEXPR uint8_t btc_decimal_places = 8;
-BC_CONSTEXPR uint8_t mbtc_decimal_places = 5;
-BC_CONSTEXPR uint8_t ubtc_decimal_places = 2;
+constexpr uint8_t btc_decimal_places = 8;
+constexpr uint8_t mbtc_decimal_places = 5;
+constexpr uint8_t ubtc_decimal_places = 2;
 
 /**
  * Validates and parses an amount string according to the BIP 21 grammar.
