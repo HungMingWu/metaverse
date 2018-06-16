@@ -23,7 +23,6 @@
 
 #include <cstddef>
 #include <streambuf>
-#include <metaverse/bitcoin/compat.hpp>
 #include <metaverse/bitcoin/define.hpp>
 
 namespace libbitcoin {

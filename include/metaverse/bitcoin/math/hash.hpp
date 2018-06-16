@@ -25,7 +25,6 @@
 #include <string>
 #include <vector>
 #include <boost/functional/hash_fwd.hpp>
-#include <metaverse/bitcoin/compat.hpp>
 #include <metaverse/bitcoin/define.hpp>
 #include <metaverse/bitcoin/utility/data.hpp>
 

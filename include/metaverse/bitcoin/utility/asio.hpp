@@ -25,7 +25,6 @@
 #include <memory>
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
-#include <metaverse/bitcoin/compat.hpp>
 
 // Convenience namespace for commonly used boost asio aliases.
 

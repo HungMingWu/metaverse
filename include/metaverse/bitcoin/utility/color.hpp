@@ -22,7 +22,6 @@
 #define MVS_COLOR_HPP
 
 #include <cstdint>
-#include <metaverse/bitcoin/compat.hpp>
 #include <metaverse/bitcoin/define.hpp>
 
 namespace libbitcoin {

@@ -22,7 +22,6 @@
 #define MVS_ELLIPTIC_CURVE_HPP
 
 #include <cstddef>
-#include <metaverse/bitcoin/compat.hpp>
 #include <metaverse/bitcoin/define.hpp>
 #include <metaverse/bitcoin/math/hash.hpp>
 #include <metaverse/bitcoin/utility/data.hpp>

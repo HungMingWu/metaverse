@@ -24,7 +24,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
-#include <metaverse/bitcoin/compat.hpp>
 #include <metaverse/bitcoin/define.hpp>
 #include <metaverse/bitcoin/utility/data.hpp>
 

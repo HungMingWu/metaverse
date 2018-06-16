@@ -22,7 +22,6 @@
 #define MVS_SCRIPT_NUMBER_HPP
 
 #include <cstddef>
-#include <metaverse/bitcoin/compat.hpp>
 #include <metaverse/bitcoin/define.hpp>
 #include <metaverse/bitcoin/utility/data.hpp>
 

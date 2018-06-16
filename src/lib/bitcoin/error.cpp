@@ -22,7 +22,6 @@
 
 #include <boost/asio.hpp>
 #include <boost/system/error_code.hpp>
-#include <metaverse/bitcoin/compat.hpp>
 #include <metaverse/bitcoin/utility/log.hpp>
 
 using namespace bc;

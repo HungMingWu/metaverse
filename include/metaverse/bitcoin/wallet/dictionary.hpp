@@ -23,7 +23,6 @@
 
 #include <array>
 #include <vector>
-#include <metaverse/bitcoin/compat.hpp>
 
 namespace libbitcoin {
 namespace wallet {

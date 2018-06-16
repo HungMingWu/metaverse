@@ -23,7 +23,6 @@
 
 #include <cstdint>
 #include <string>
-#include <metaverse/bitcoin/compat.hpp>
 #include <metaverse/bitcoin/define.hpp>
 #include <metaverse/bitcoin/math/checksum.hpp>
 #include <metaverse/bitcoin/math/elliptic_curve.hpp>

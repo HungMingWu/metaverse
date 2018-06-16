@@ -22,7 +22,6 @@
 #define MVS_ENCRYPTED_KEYS_HPP
 
 #include <string>
-#include <metaverse/bitcoin/compat.hpp>
 #include <metaverse/bitcoin/define.hpp>
 #include <metaverse/bitcoin/math/crypto.hpp>
 #include <metaverse/bitcoin/math/elliptic_curve.hpp>

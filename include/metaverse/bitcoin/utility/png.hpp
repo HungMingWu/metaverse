@@ -23,7 +23,6 @@
 
 #include <cstdint>
 #include <istream>
-#include <metaverse/bitcoin/compat.hpp>
 #include <metaverse/bitcoin/define.hpp>
 #include <metaverse/bitcoin/utility/color.hpp>
 #include <metaverse/bitcoin/utility/data.hpp>

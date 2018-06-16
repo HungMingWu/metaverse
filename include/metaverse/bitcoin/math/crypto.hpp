@@ -21,7 +21,6 @@
 #define MVS_AES256_HPP
 
 #include <cstdint>
-#include <metaverse/bitcoin/compat.hpp>
 #include <metaverse/bitcoin/define.hpp>
 #include <metaverse/bitcoin/utility/data.hpp>
 

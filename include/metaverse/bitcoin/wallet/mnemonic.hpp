@@ -24,7 +24,6 @@
 #include <cstddef>
 #include <string>
 #include <vector>
-#include <metaverse/bitcoin/compat.hpp>
 #include <metaverse/bitcoin/define.hpp>
 #include <metaverse/bitcoin/math/hash.hpp>
 #include <metaverse/bitcoin/unicode/unicode.hpp>

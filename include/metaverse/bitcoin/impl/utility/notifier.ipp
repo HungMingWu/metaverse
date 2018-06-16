@@ -25,7 +25,6 @@
 #include <memory>
 #include <string>
 #include <utility>
-#include <metaverse/bitcoin/compat.hpp>
 #include <metaverse/bitcoin/utility/asio.hpp>
 #include <metaverse/bitcoin/utility/assert.hpp>
 #include <metaverse/bitcoin/utility/dispatcher.hpp>
