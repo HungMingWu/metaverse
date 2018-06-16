@@ -21,11 +21,11 @@
 #include <metaverse/bitcoin/config/authority.hpp>
 
 #include <sstream>
+#include <regex>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/program_options.hpp>
-#include <boost/regex.hpp>
 #include <metaverse/bitcoin/formats/base_16.hpp>
 #include <metaverse/bitcoin/utility/asio.hpp>
 #include <metaverse/bitcoin/utility/assert.hpp>
@@ -85,10 +85,10 @@ static asio::ipv6 to_ipv6(const asio::address& ip_address)
 static std::string to_ipv4_hostname(const asio::address& ip_address)
 {
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
-    static const regex regular("^::ffff:([0-9\\.]+)$");
+    static const std::regex regular("^::ffff:([0-9\\.]+)$");
 
     const auto address = ip_address.to_string();
-    sregex_iterator it(address.begin(), address.end(), regular), end;
+    std::sregex_iterator it(address.begin(), address.end(), regular), end;
     if (it == end)
         return "";
 
@@ -220,10 +220,10 @@ std::istream& operator>>(std::istream& input, authority& argument)
     input >> value;
 
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
-    static const regex regular(
+    static const std::regex regular(
         "^(([0-9\\.]+)|\\[([0-9a-f:\\.]+)])(:([0-9]{1,5}))?$");
 
-    sregex_iterator it(value.begin(), value.end(), regular), end;
+    std::sregex_iterator it(value.begin(), value.end(), regular), end;
     if (it == end)
     {
         BOOST_THROW_EXCEPTION(invalid_option_value(value));

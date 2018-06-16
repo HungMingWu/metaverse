@@ -92,7 +92,7 @@ IF(USE_UPNP)
 ENDIF()
 
 FIND_PACKAGE(Boost 1.56 REQUIRED COMPONENTS date_time filesystem system
-program_options regex thread)
+program_options thread)
 #set(Boost_LIBRARIES ${Boost_LIBRARIES} icui18n icuuc icudata pthread dl)
 
 FIND_PACKAGE(secp256k1 REQUIRED)

@@ -24,13 +24,13 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <regex>
 #include <metaverse/bitcoin.hpp>
 #include <metaverse/network/channel.hpp>
 #include <metaverse/network/proxy.hpp>
 #include <metaverse/network/settings.hpp>
 #include <metaverse/network/socket.hpp>
 #include <boost/format.hpp>
-#include <boost/regex.hpp>
 
 namespace libbitcoin {
 namespace network {
@@ -109,10 +109,10 @@ void connector::connect(const endpoint& endpoint, connect_handler handler
 static std::string to_ipv4_hostname(const asio::address& ip_address)
 {
     // std::regex requires gcc 4.9, so we are using boost::regex for now.
-    static const boost::regex regular("^::ffff:([0-9\\.]+)$");
+    static const std::regex regular("^::ffff:([0-9\\.]+)$");
 
     const auto address = ip_address.to_string();
-    boost::sregex_iterator it(address.begin(), address.end(), regular), end;
+    std::sregex_iterator it(address.begin(), address.end(), regular), end;
     if (it == end)
         return "";
 
