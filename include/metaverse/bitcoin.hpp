@@ -14,7 +14,6 @@
  * Maintainers: Do not include this header internal to this library.
  */
 
-#include <metaverse/bitcoin/compat.h>
 #include <metaverse/bitcoin/constants.hpp>
 #include <metaverse/bitcoin/define.hpp>
 #include <metaverse/bitcoin/error.hpp>

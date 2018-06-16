@@ -16,8 +16,15 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <metaverse/bitcoin/compat.h>
 #include "zeroize.h"
+
+#ifdef _MSC_VER
+	/* There is no <endian.h> for MSVC but it is always little endian. */
+	#ifndef __LITTLE_ENDIAN__
+		# undef __BIG_ENDIAN__
+		# define __LITTLE_ENDIAN__
+	#endif
+#endif
 
 #ifdef __BIG_ENDIAN__
     #define SHA1_BIG_ENDIAN
