@@ -32,30 +32,6 @@
 namespace libbitcoin {
 namespace chain {
 
-header header::factory_from_data(const data_chunk& data,
-    bool with_transaction_count)
-{
-    header instance;
-    instance.from_data(data, with_transaction_count);
-    return instance;
-}
-
-header header::factory_from_data(std::istream& stream,
-    bool with_transaction_count)
-{
-    header instance;
-    instance.from_data(stream, with_transaction_count);
-    return instance;
-}
-
-header header::factory_from_data(reader& source,
-    bool with_transaction_count)
-{
-    header instance;
-    instance.from_data(source, with_transaction_count);
-    return instance;
-}
-
 uint64_t header::satoshi_fixed_size_without_transaction_count()
 {
     return 148;

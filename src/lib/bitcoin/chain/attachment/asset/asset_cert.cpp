@@ -23,8 +23,7 @@
 #include <metaverse/bitcoin/utility/container_source.hpp>
 #include <metaverse/bitcoin/utility/istream_reader.hpp>
 #include <metaverse/bitcoin/utility/ostream_writer.hpp>
-#include <metaverse/blockchain/block_chain_impl.hpp>
-#include <metaverse/blockchain/validate_transaction.hpp>
+#include <metaverse/bitcoin/utility/string.hpp>
 
 namespace libbitcoin {
 namespace chain {

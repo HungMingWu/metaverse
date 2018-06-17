@@ -43,6 +43,8 @@ namespace blockchain {
 namespace libbitcoin {
 namespace chain {
 
+using CheckFunc = std::function<std::string(const std::string&)>;
+
 class BC_API output
 {
 public:
@@ -63,8 +65,8 @@ public:
     void to_data(writer& sink) const;
     std::string to_string(uint32_t flags) const;
     bool is_valid() const;
-    code check_attachment_address(bc::blockchain::block_chain_impl& chain) const;
-    code check_attachment_did_match_address(bc::blockchain::block_chain_impl& chain) const;
+    code check_attachment_address() const;
+    code check_attachment_did_match_address(CheckFunc func) const;
     std::string get_script_address() const;
     void reset();
     uint64_t serialized_size() const;

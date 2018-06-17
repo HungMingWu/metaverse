@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <metaverse/consensus/libdevcore/RLP.h>
 
 using namespace libbitcoin;
 

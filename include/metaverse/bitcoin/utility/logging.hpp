@@ -24,12 +24,11 @@
 #include <fstream>
 #include <iostream>
 #include <metaverse/bitcoin.hpp>
-#include <metaverse/network/define.hpp>
 
 namespace libbitcoin {
 
 /// Set up global logging.
-BCT_API void initialize_logging(bc::ofstream& debug, bc::ofstream& error,
+BC_API void initialize_logging(bc::ofstream& debug, bc::ofstream& error,
     std::ostream& output_stream, std::ostream& error_stream, std::string level = "DEBUG");
 
 /// Class Logger

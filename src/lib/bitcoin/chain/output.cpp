@@ -65,16 +65,6 @@ bool output::is_valid_symbol(const std::string& symbol, uint32_t tx_version)
         if (!(std::isalnum(i) || i=='.'))
             return false;
     }
-    if (tx_version >= transaction_version::check_nova_feature) {
-        // upper char check
-        if (symbol != boost::to_upper_copy(symbol)) {
-            return false;
-        }
-        // sensitive check
-        if (bc::wallet::symbol::is_sensitive(symbol)) {
-            return false;
-        }
-    }
     return true;
 }
 
@@ -88,15 +78,6 @@ bool output::is_valid_did_symbol(const std::string& symbol, bool check_sensitive
     // char check
     for (const auto& i : symbol) {
         if (!(std::isalnum(i) || i=='.'|| i=='@' || i=='_' || i=='-'))
-            return false;
-    }
-
-    if(check_sensitive)
-    {
-        // sensitive check
-        std::string symbolupper = symbol;
-        boost::to_upper(symbolupper);
-        if (bc::wallet::symbol::is_sensitive(symbolupper))
             return false;
     }
 
@@ -116,14 +97,6 @@ bool output::is_valid_mit_symbol(const std::string& symbol, bool check_sensitive
             return false;
     }
 
-    if (check_sensitive)
-    {
-        // sensitive check
-        auto upper = boost::to_upper_copy(symbol);
-        if (bc::wallet::symbol::is_sensitive(upper))
-            return false;
-    }
-
     return true;
 }
 
@@ -139,7 +112,7 @@ std::string output::get_script_address() const
     return payment_address.encoded();
 }
 
-code output::check_attachment_address(bc::blockchain::block_chain_impl& chain) const
+code output::check_attachment_address() const
 {
     bool is_asset = false;
     bool is_did = false;
@@ -166,14 +139,14 @@ code output::check_attachment_address(bc::blockchain::block_chain_impl& chain) c
     return error::success;
 }
 
-code output::check_attachment_did_match_address(bc::blockchain::block_chain_impl& chain) const
+code output::check_attachment_did_match_address(CheckFunc func) const
 {
 
     auto todid = attach_data.get_to_did();
     if (!todid.empty())
     {
         auto address = get_script_address();
-        if (todid != chain.get_did_from_address(address))
+        if (todid != func(address))
         {
             return error::did_address_not_match;
         }

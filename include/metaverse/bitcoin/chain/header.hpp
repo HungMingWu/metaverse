@@ -35,11 +35,6 @@
 #include <metaverse/bitcoin/utility/thread.hpp>
 #include <metaverse/bitcoin/utility/writer.hpp>
 
-#include <metaverse/consensus/libdevcore/FixedHash.h>
-#include <metaverse/consensus/libdevcore/Common.h>
-#include <metaverse/consensus/libdevcore/RLP.h>
-#include <metaverse/consensus/libdevcore/SHA3.h>
-
 namespace libbitcoin {
     using bigint = boost::multiprecision::number<boost::multiprecision::cpp_int_backend<>>;
     using u64 =  boost::multiprecision::number<boost::multiprecision::cpp_int_backend<64, 64, boost::multiprecision::unsigned_magnitude, boost::multiprecision::unchecked, void>>;
@@ -55,12 +50,6 @@ public:
     typedef std::shared_ptr<header> ptr;
     typedef std::vector<ptr> ptr_list;
 
-    static header factory_from_data(const data_chunk& data,
-        bool with_transaction_count = true);
-    static header factory_from_data(std::istream& stream,
-        bool with_transaction_count = true);
-    static header factory_from_data(reader& source,
-        bool with_transaction_count = true);
     static uint64_t satoshi_fixed_size_without_transaction_count();
 
     header();

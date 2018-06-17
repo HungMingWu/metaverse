@@ -67,7 +67,6 @@ public:
 
     bool operator< (const did_detail& other) const;
     std::string to_string() const;
-    void to_json(std::ostream& out);
 
     bool is_valid() const;
     void reset();

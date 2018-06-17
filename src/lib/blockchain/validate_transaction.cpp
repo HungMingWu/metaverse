@@ -29,6 +29,7 @@
 #include <metaverse/blockchain/transaction_pool.hpp>
 #include <metaverse/blockchain/validate_block.hpp>
 #include <metaverse/consensus/miner.hpp>
+#include <boost/algorithm/string.hpp>
 
 #ifdef WITH_CONSENSUS
 #include <metaverse/consensus.hpp>
@@ -928,11 +929,14 @@ code validate_transaction::check_did_transaction() const
 
     for (const auto& output : tx.outputs)
     {
-        if ((ret = output.check_attachment_address(chain)) != error::success)
+        if ((ret = output.check_attachment_address()) != error::success)
             return ret;
 
+		auto checkFunc = [&chain](const std::string &address) {
+			return chain.get_did_from_address(address);
+		};
         //to_did check(strong check)
-        if ((ret = output.check_attachment_did_match_address(chain)) != error::success)
+        if ((ret = output.check_attachment_did_match_address(checkFunc)) != error::success)
             return ret;
 
         //from_did (weak check)
@@ -1193,7 +1197,23 @@ code validate_transaction::check_transaction_basic() const
 
     for (auto& output : tx.outputs) {
         if (output.is_asset_issue()) {
-            if (!chain::output::is_valid_symbol(output.get_asset_symbol(), tx.version)) {
+			auto is_valid_symbol = [](const std::string& symbol, uint32_t tx_version)
+			{
+				if (!chain::output::is_valid_symbol(symbol, tx_version)) return false;
+
+				if (tx_version >= transaction_version::check_nova_feature) {
+					// upper char check
+					if (symbol != boost::to_upper_copy(symbol)) {
+						return false;
+					}
+					// sensitive check
+					if (bc::wallet::symbol::is_sensitive(symbol)) {
+						return false;
+					}
+				}
+				return true;
+			};
+            if (!is_valid_symbol(output.get_asset_symbol(), tx.version)) {
                 return error::asset_symbol_invalid;
             }
         }
@@ -1205,12 +1225,42 @@ code validate_transaction::check_transaction_basic() const
         }
         else if (output.is_did_register()) {
             auto is_test = chain.chain_settings().use_testnet_rules;
-            if (!chain::output::is_valid_did_symbol(output.get_did_symbol(), !is_test)) {
+			auto is_valid_did_symbol = [](const std::string& symbol, bool check_sensitive)
+			{
+				if (!chain::output::is_valid_did_symbol(symbol, checksum_size)) return false;
+
+				if (check_sensitive)
+				{
+					// sensitive check
+					std::string symbolupper = symbol;
+					boost::to_upper(symbolupper);
+					if (bc::wallet::symbol::is_sensitive(symbolupper))
+						return false;
+				}
+
+				return true;
+			};
+            if (!is_valid_did_symbol(output.get_did_symbol(), !is_test)) {
                 return error::did_symbol_invalid;
             }
         }
         else if (output.is_asset_mit_register()) {
-            if (!chain::output::is_valid_mit_symbol(output.get_asset_symbol(), true)) {
+			auto is_valid_mit_symbol = [](const std::string& symbol, bool check_sensitive)
+			{
+				if (!chain::output::is_valid_mit_symbol(symbol, check_sensitive)) 
+					return false;
+
+				if (check_sensitive)
+				{
+					// sensitive check
+					auto upper = boost::to_upper_copy(symbol);
+					if (bc::wallet::symbol::is_sensitive(upper))
+						return false;
+				}
+
+				return true;
+			};
+            if (!is_valid_mit_symbol(output.get_asset_symbol(), true)) {
                 return error::mit_symbol_invalid;
             }
         }

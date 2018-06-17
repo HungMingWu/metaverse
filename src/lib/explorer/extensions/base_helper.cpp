@@ -69,7 +69,23 @@ utxo_attach_type get_utxo_attach_type(const chain::output& output_)
 
 void check_did_symbol(const std::string& symbol, bool check_sensitive)
 {
-    if (!chain::output::is_valid_did_symbol(symbol, check_sensitive)) {
+	auto is_valid_did_symbol = [](const std::string& symbol, bool check_sensitive)
+	{
+		if (!chain::output::is_valid_did_symbol(symbol, checksum_size)) return false;
+
+		if (check_sensitive)
+		{
+			// sensitive check
+			std::string symbolupper = symbol;
+			boost::to_upper(symbolupper);
+			if (bc::wallet::symbol::is_sensitive(symbolupper))
+				return false;
+		}
+
+		return true;
+	};
+
+    if (!is_valid_did_symbol(symbol, check_sensitive)) {
             throw did_symbol_name_exception{"Did symbol " + symbol + " is not valid."};
     }
 
