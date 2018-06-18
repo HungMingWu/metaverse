@@ -19,7 +19,7 @@
  * @date 2014
  */
 
-#include <metaverse/consensus/libdevcore/Common.h>
+#include <metaverse/bitcoin/utility/Common.h>
 #include <metaverse/consensus/libdevcore/Exceptions.h>
 #include <metaverse/consensus/libdevcore/Log.h>
 #include <metaverse/consensus/libdevcore/BuildInfo.h>

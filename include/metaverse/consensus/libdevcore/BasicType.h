@@ -1,7 +1,7 @@
 #pragma once
 
 #include <mutex>
-#include "FixedHash.h"
+#include <metaverse/bitcoin/utility/FixedHash.h>
 #include "SHA3.h"
 #include "Guards.h"
 #include <boost/throw_exception.hpp>

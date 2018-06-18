@@ -29,8 +29,8 @@
 #pragma once
 
 #include <string>
-#include "Common.h"
-#include "FixedHash.h"
+#include <metaverse/bitcoin/utility/Common.h>
+#include <metaverse/bitcoin/utility/FixedHash.h>
 
 namespace libbitcoin
 {

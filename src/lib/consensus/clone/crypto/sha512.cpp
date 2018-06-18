@@ -4,7 +4,7 @@
 
 #include "crypto/sha512.h"
 
-#include "crypto/common.h"
+#include <metaverse/bitcoin/utility/crypto/common.h>
 
 #include <string.h>
 

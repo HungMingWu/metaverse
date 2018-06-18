@@ -38,6 +38,14 @@
 namespace libbitcoin {
 namespace blockchain {
 
+namespace {
+	const char* LOG_HEADER{ "attenuation_model" };
+
+	std::string chunk_to_string(const data_chunk& chunk) {
+		return std::string(chunk.begin(), chunk.end());
+	}
+};
+
 static constexpr unsigned int min_tx_fee = 10000;
 
 using namespace chain;
@@ -1140,7 +1148,139 @@ code validate_transaction::check_transaction() const
             return ret;
         }
 
-        if ((ret = attenuation_model::check_model_param(*this)) != error::success) {
+		auto check_model_param = [this]()
+		{
+			const transaction& tx = get_tx();
+			const blockchain::block_chain_impl& chain = get_blockchain();
+
+			if (tx.version < transaction_version::check_nova_feature) {
+				return error::success;
+			}
+
+			struct ext_input_point {
+				chain::input_point input_point_;
+				chain::output prev_output_;
+				uint64_t prev_blockheight_;
+			};
+
+			std::vector<ext_input_point> vec_prev_input;
+
+			for (const auto& input : tx.inputs) {
+				if (input.previous_output.is_null()) {
+					return error::previous_output_null;
+				}
+
+				chain::transaction prev_tx;
+				uint64_t prev_height = 0;
+				if (!get_previous_tx(prev_tx, prev_height, input)) {
+					return error::input_not_found;
+				}
+
+				const auto& prev_output = prev_tx.outputs.at(input.previous_output.index);
+				if (!operation::is_pay_key_hash_with_attenuation_model_pattern(prev_output.script.operations)) {
+					continue;
+				}
+
+				ext_input_point prev{ input.previous_output, prev_output, prev_height };
+				vec_prev_input.emplace_back(prev);
+			}
+
+			if (vec_prev_input.empty()) {
+				return error::success;
+			}
+
+			uint64_t current_blockheight = 0;
+			chain.get_last_height(current_blockheight);
+
+			for (auto& output : tx.outputs) {
+				if (!operation::is_pay_key_hash_with_attenuation_model_pattern(output.script.operations)) {
+					continue;
+				}
+
+				const auto& model_param = output.get_attenuation_model_param();
+				if (!attenuation_model::validate_model_param(model_param, output.get_asset_amount())) {
+					log::debug(LOG_HEADER) << "check param failed, " << chunk_to_string(model_param);
+					return error::attenuation_model_param_error;
+				}
+
+				const auto& input_point_data = operation::
+					get_input_point_from_pay_key_hash_with_attenuation_model(output.script.operations);
+				chain::input_point input_point = chain::point::factory_from_data(input_point_data);
+				if (input_point.is_null()) {
+					if (!attenuation_model::check_model_param(model_param, output.get_asset_amount())) {
+						log::debug(LOG_HEADER) << "input is null, " << chunk_to_string(model_param);
+						return error::attenuation_model_param_error;
+					}
+					continue;
+				}
+
+				auto iter = std::find_if(vec_prev_input.begin(), vec_prev_input.end(),
+					[&input_point](const ext_input_point& elem) {
+					return elem.input_point_ == input_point;
+				});
+
+				if (iter == vec_prev_input.end()) {
+					log::debug(LOG_HEADER) << "input not found for " << input_point.to_string();
+					return error::attenuation_model_param_error;
+				}
+
+				const auto& prev_model_param = iter->prev_output_.get_attenuation_model_param();
+
+				if (!attenuation_model::check_model_param_immutable(prev_model_param, model_param)) {
+					log::debug(LOG_HEADER) << "check immutable failed, "
+						<< "prev is " << chunk_to_string(prev_model_param)
+						<< ", new is " << chunk_to_string(model_param);
+					return error::attenuation_model_param_error;
+				}
+
+				auto curr_diff_height = current_blockheight - iter->prev_blockheight_;
+				auto real_diff_height = attenuation_model::get_diff_height(prev_model_param, model_param);
+
+				if (real_diff_height > curr_diff_height) {
+					log::debug(LOG_HEADER) << "check diff height failed, "
+						<< real_diff_height << ", curr diff is " << curr_diff_height;
+					return error::attenuation_model_param_error;
+				}
+
+				auto asset_total_amount = iter->prev_output_.get_asset_amount();
+				auto new_model_param_ptr = std::make_shared<data_chunk>();
+				auto asset_amount = attenuation_model::get_available_asset_amount(
+					asset_total_amount, real_diff_height,
+					prev_model_param, new_model_param_ptr);
+
+				if (asset_total_amount != (asset_amount + output.get_asset_amount())) {
+					log::debug(LOG_HEADER) << "check amount failed, "
+						<< "locked shoule be " << asset_total_amount - asset_amount
+						<< ", but real locked is " << output.get_asset_amount();
+					return error::attenuation_model_param_error;
+				}
+
+				if (!new_model_param_ptr || (*new_model_param_ptr != model_param)) {
+					log::debug(LOG_HEADER) << "check model new param failed, "
+						<< "prev is " << chunk_to_string(model_param) << ", new is "
+						<< (new_model_param_ptr ? chunk_to_string(*new_model_param_ptr) : std::string("empty"));
+					return error::attenuation_model_param_error;
+				}
+
+				// prevent multiple locked outputs connect to the same input
+				vec_prev_input.erase(iter);
+			}
+
+			// check the left is all spendable
+			for (const auto& ext_input : vec_prev_input) {
+				const auto& prev_model_param = ext_input.prev_output_.get_attenuation_model_param();
+				auto curr_diff_height = current_blockheight - ext_input.prev_blockheight_;
+				auto real_diff_height = attenuation_model::get_diff_height(prev_model_param, data_chunk());
+				if (real_diff_height > curr_diff_height) {
+					log::debug(LOG_HEADER) << "check diff height failed for all spendable, "
+						<< real_diff_height << ", curr diff is " << curr_diff_height;
+					return error::attenuation_model_param_error;
+				}
+			}
+			return error::success;
+		};
+
+        if ((ret = check_model_param()) != error::success) {
             return ret;
         }
     }

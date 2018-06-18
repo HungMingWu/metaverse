@@ -27,7 +27,7 @@
 #include <metaverse/bitcoin/utility/container_source.hpp>
 #include <metaverse/bitcoin/utility/istream_reader.hpp>
 #include <metaverse/bitcoin/utility/ostream_writer.hpp>
-#include <metaverse/consensus/libdevcore/FixedHash.h>
+#include <metaverse/bitcoin/utility/FixedHash.h>
 
 namespace libbitcoin {
 namespace chain {

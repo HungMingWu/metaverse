@@ -7,7 +7,7 @@
 #define BITCOIN_PRIMITIVES_TRANSACTION_H
 
 #include "amount.h"
-#include "script/script.h"
+#include <metaverse/bitcoin/utility/script/script.h>
 #include "serialize.h"
 #include "uint256.h"
 #include <metaverse/bitcoin/chain/attachment/attachment.hpp>

@@ -29,8 +29,8 @@
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/tuple/tuple.hpp>
-#include "CommonData.h"
-#include "FixedHash.h"
+#include <metaverse/bitcoin/utility/CommonData.h>
+#include <metaverse/bitcoin/utility/FixedHash.h>
 
 namespace libbitcoin
 {

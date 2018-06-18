@@ -63,7 +63,6 @@ public:
 
     static bool check_model_index(uint32_t index);
     static bool validate_model_param(const data_chunk& param, uint64_t total_amount);
-    static code check_model_param(const blockchain::validate_transaction&);
     static bool check_model_param_format(const data_chunk& param);
     static bool check_model_param(const data_chunk& param, uint64_t total_amount);
     static bool check_model_param_initial(std::string& param, uint64_t total_amount, bool is_init=false);

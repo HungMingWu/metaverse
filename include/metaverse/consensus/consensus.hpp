@@ -25,7 +25,7 @@
 #include <metaverse/consensus/define.hpp>
 #include <metaverse/consensus/export.hpp>
 #include "pubkey.h"
-#include "script/script_error.h"
+#include <metaverse/bitcoin/utility/script/script_error.h>
 
 namespace libbitcoin {
 namespace consensus {

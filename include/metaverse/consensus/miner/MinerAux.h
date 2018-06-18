@@ -6,8 +6,9 @@
 #include <metaverse/consensus/libdevcore/Log.h>
 #include <metaverse/consensus/libdevcore/BasicType.h>
 #include <metaverse/bitcoin/chain/header.hpp>
-#include <metaverse/consensus/libdevcore/FixedHash.h>
+#include <metaverse/bitcoin/utility/FixedHash.h>
 #include <metaverse/consensus/libdevcore/Guards.h>
+
 namespace libbitcoin
 {
 

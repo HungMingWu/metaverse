@@ -3,10 +3,10 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "script.h"
+#include <metaverse/bitcoin/utility/script/script.h>
 
-#include "tinyformat.h"
-#include "utilstrencodings.h"
+#include <metaverse/bitcoin/utility/tinyformat.h>
+#include <metaverse/bitcoin/utility/utilstrencodings.h>
 
 using namespace std;
 

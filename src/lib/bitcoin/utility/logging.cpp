@@ -28,7 +28,6 @@
 #include <mutex>
 #include <boost/date_time.hpp>
 #include <metaverse/bitcoin.hpp>
-#include <metaverse/network/define.hpp>
 
 namespace libbitcoin {
 

@@ -6,8 +6,8 @@
 #ifndef BITCOIN_SCRIPT_SCRIPT_H
 #define BITCOIN_SCRIPT_SCRIPT_H
 
-#include "crypto/common.h"
-#include "prevector.h"
+#include <metaverse/bitcoin/utility/crypto/common.h>
+#include <metaverse/bitcoin/utility/prevector.h>
 
 #include <assert.h>
 #include <climits>

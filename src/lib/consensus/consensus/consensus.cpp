@@ -31,7 +31,7 @@
 #include "primitives/transaction.h"
 #include "pubkey.h"
 #include "script/interpreter.h"
-#include "script/script_error.h"
+#include <metaverse/bitcoin/utility/script/script_error.h>
 #include "version.h"
 
 namespace libbitcoin {

@@ -28,10 +28,10 @@
 #include <exception>
 #include <iostream>
 #include <iomanip>
-#include "vector_ref.h"
-#include "Common.h"
+#include <metaverse/bitcoin/utility/vector_ref.h>
+#include <metaverse/bitcoin/utility/Common.h>
 #include "Exceptions.h"
-#include "FixedHash.h"
+#include <metaverse/bitcoin/utility/FixedHash.h>
 
 namespace libbitcoin
 {

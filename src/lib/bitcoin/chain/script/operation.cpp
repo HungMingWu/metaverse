@@ -18,7 +18,7 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-#include <script/script.h>
+#include <metaverse/bitcoin/utility/script/script.h>
 #include <metaverse/bitcoin/chain/script/operation.hpp>
 #include <algorithm>
 #include <sstream>

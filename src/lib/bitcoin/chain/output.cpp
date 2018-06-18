@@ -27,7 +27,6 @@
 #include <metaverse/bitcoin/utility/istream_reader.hpp>
 #include <metaverse/bitcoin/utility/ostream_writer.hpp>
 #include <metaverse/bitcoin/wallet/payment_address.hpp>
-#include <metaverse/blockchain/block_chain_impl.hpp>
 #include <boost/algorithm/string.hpp>
 
 namespace libbitcoin {
@@ -511,7 +510,7 @@ std::string output::get_did_symbol() const // for validate_transaction.cpp to ca
 {
     if (attach_data.get_type() == DID_TYPE) {
         auto did_info = boost::get<did>(attach_data.get_attach());
-        auto detail_info = boost::get<did_detail>(did_info.get_data());
+        auto detail_info = did_info.get_data();
         return detail_info.get_symbol();
 
     }
@@ -522,7 +521,7 @@ std::string output::get_did_address() const // for validate_transaction.cpp to c
 {
     if(attach_data.get_type() == DID_TYPE) {
         auto did_info = boost::get<did>(attach_data.get_attach());
-        auto detail_info = boost::get<did_detail>(did_info.get_data());
+        auto detail_info = did_info.get_data();
         return detail_info.get_address();
 
     }

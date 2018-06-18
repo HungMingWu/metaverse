@@ -3,9 +3,9 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "utilstrencodings.h"
+#include <metaverse/bitcoin/utility/utilstrencodings.h>
 
-#include "tinyformat.h"
+#include <metaverse/bitcoin/utility/tinyformat.h>
 
 #include <cstdlib>
 #include <cstring>

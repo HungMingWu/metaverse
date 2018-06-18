@@ -25,7 +25,6 @@
 #include <metaverse/bitcoin/utility/container_source.hpp>
 #include <metaverse/bitcoin/utility/istream_reader.hpp>
 #include <metaverse/bitcoin/utility/ostream_writer.hpp>
-#include <json/minijson_writer.hpp>
 
 namespace libbitcoin {
 namespace chain {
