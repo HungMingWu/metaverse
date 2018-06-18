@@ -20,7 +20,7 @@
  */
 
 //#include "CommonData.h"
-#include <metaverse/consensus/libdevcore/CommonData.h>
+#include <metaverse/bitcoin/utility/CommonData.h>
 #include <random>
 
 #if defined(_MSC_VER)

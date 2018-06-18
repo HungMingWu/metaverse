@@ -19,7 +19,7 @@
  * @date 2014
  */
 
-#include <metaverse/consensus/libdevcore/FixedHash.h>
+#include <metaverse/bitcoin/utility/FixedHash.h>
 #include <ctime>
 #include <boost/algorithm/string.hpp>
 using namespace std;
