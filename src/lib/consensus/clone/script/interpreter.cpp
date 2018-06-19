@@ -5,13 +5,13 @@
 
 #include "interpreter.h"
 
-#include "primitives/transaction.h"
-#include "crypto/ripemd160.h"
-#include "crypto/sha1.h"
-#include "crypto/sha256.h"
-#include "pubkey.h"
+#include "../primitives/transaction.h"
+#include "../crypto/ripemd160.h"
+#include "../crypto/sha1.h"
+#include "../crypto/sha256.h"
+#include "../pubkey.h"
 #include <metaverse/bitcoin/utility/script/script.h>
-#include "uint256.h"
+#include "../uint256.h"
 #include <metaverse/bitcoin/chain/attachment/asset/attenuation_model.hpp>
 
 using namespace std;

@@ -24,7 +24,6 @@
 #include <cstddef>
 #include <metaverse/consensus/define.hpp>
 #include <metaverse/consensus/export.hpp>
-#include "pubkey.h"
 #include <metaverse/bitcoin/utility/script/script_error.h>
 
 namespace libbitcoin {
@@ -38,7 +37,6 @@ public:
     TxInputStream& read(char* destination, size_t size);
 
 private:
-    static ECCVerifyHandle secp256k1_context_;
     const unsigned char* source_;
     size_t remaining_;
 };

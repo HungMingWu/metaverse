@@ -28,17 +28,17 @@
 #include <metaverse/consensus/define.hpp>
 #include <metaverse/consensus/export.hpp>
 #include <metaverse/consensus/version.hpp>
-#include "primitives/transaction.h"
-#include "pubkey.h"
-#include "script/interpreter.h"
+#include "../clone/primitives/transaction.h"
+#include "../clone/pubkey.h"
+#include "../clone/script/interpreter.h"
 #include <metaverse/bitcoin/utility/script/script_error.h>
-#include "version.h"
+#include "../clone/version.h"
 
 namespace libbitcoin {
 namespace consensus {
 
 // Static initialization of libsecp256k1 initialization context. 
-ECCVerifyHandle TxInputStream::secp256k1_context_ = ECCVerifyHandle();
+static ECCVerifyHandle secp256k1_context_ = ECCVerifyHandle();
 
 TxInputStream::TxInputStream(const unsigned char* transaction,
     size_t transaction_size)

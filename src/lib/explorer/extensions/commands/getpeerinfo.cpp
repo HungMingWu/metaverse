@@ -19,7 +19,6 @@
  */
 
 
-#include <metaverse/node/p2p_node.hpp>
 #include <metaverse/explorer/dispatch.hpp>
 #include <metaverse/explorer/extensions/commands/getpeerinfo.hpp>
 #include <metaverse/explorer/extensions/command_extension_func.hpp>

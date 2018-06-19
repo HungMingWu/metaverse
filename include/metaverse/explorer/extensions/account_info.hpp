@@ -28,19 +28,22 @@
 #include <metaverse/bitcoin/utility/reader.hpp>
 #include <metaverse/bitcoin/utility/writer.hpp>
 #include <metaverse/bitcoin/formats/base_16.hpp>
-#include <metaverse/blockchain/block_chain_impl.hpp>
+#include <metaverse/bitcoin/chain/attachment/account/account.hpp>
 #include <metaverse/bitcoin/chain/attachment/account/account_address.hpp>
 #include <metaverse/bitcoin/chain/attachment/asset/asset_detail.hpp>
 
 namespace libbitcoin {
 namespace chain {
-
+	using StoreAccountFunc = std::function<void(const std::shared_ptr<account>&)>;
+	using StoreAddressFunc = std::function<void(const std::shared_ptr<account_address>&)>;
+	using StoreAssetFunc = 
+		std::function<void(const std::shared_ptr<asset_detail>&, const std::string&)>;
 // used for store all account related information
 class BC_API account_info
 {
 public:
-	account_info(libbitcoin::blockchain::block_chain_impl& blockchain, std::string& passphrase);
-	account_info(libbitcoin::blockchain::block_chain_impl& blockchain, std::string& passphrase,
+	account_info(std::string& passphrase);
+	account_info(std::string& passphrase,
         account& meta, std::vector<account_address>& addr_vec, std::vector<asset_detail>& asset_vec);
 
     bool from_data(const data_chunk& data);
@@ -49,7 +52,9 @@ public:
     data_chunk to_data() const;
     void to_data(std::ostream& stream) const;
     void to_data(writer& sink) const;
-    void store(std::string& name, std::string& passwd);
+    void store(std::string& name, std::string& passwd, 
+		StoreAccountFunc store_account, StoreAddressFunc store_account_address,
+		StoreAssetFunc store_account_asset);
     account get_account() const;
     std::vector<account_address>& get_account_address(); 
     std::vector<asset_detail>& get_account_asset();
@@ -59,7 +64,6 @@ public:
     friend std::ostream& operator<<(std::ostream& output, const account_info& self_ref);
 
 private:
-    libbitcoin::blockchain::block_chain_impl& blockchain_;
 	account meta_;
 	std::vector<account_address> addr_vec_;
 	std::vector<asset_detail> asset_vec_;

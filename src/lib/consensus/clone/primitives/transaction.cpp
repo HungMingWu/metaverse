@@ -3,7 +3,7 @@
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "primitives/transaction.h"
+#include "../clone/primitives/transaction.h"
 
 #include "hash.h"
 #include <metaverse/bitcoin/utility/tinyformat.h>

@@ -37,13 +37,12 @@ using namespace libbitcoin::config;
 namespace libbitcoin {
 namespace chain {
 
-account_info::account_info(blockchain::block_chain_impl& blockchain, std::string& passphrase):blockchain_(blockchain),
-    passphrase_(passphrase)
+account_info::account_info(std::string& passphrase) : passphrase_(passphrase)
 {
 }
-account_info::account_info(blockchain::block_chain_impl& blockchain, std::string& passphrase,
+account_info::account_info(std::string& passphrase,
     account& meta, std::vector<account_address>& addr_vec,	std::vector<asset_detail>& asset_vec):
-		blockchain_(blockchain), passphrase_(passphrase), meta_(meta), addr_vec_(addr_vec), asset_vec_(asset_vec)
+		passphrase_(passphrase), meta_(meta), addr_vec_(addr_vec), asset_vec_(asset_vec)
 {
 }
 
@@ -128,7 +127,9 @@ std::vector<asset_detail>& account_info::get_account_asset()
 {
     return asset_vec_;
 }
-void account_info::store(std::string& name, std::string& passwd)
+void account_info::store(std::string& name, std::string& passwd,
+	StoreAccountFunc store_account, StoreAddressFunc store_account_address,
+	StoreAssetFunc store_account_asset)
 {
     // restore account
     auto acc = std::make_shared<account>(meta_);
@@ -136,7 +137,7 @@ void account_info::store(std::string& name, std::string& passwd)
     acc->set_name(name);
     acc->set_mnemonic(mnemonic, passwd);
     acc->set_passwd(passwd);
-    blockchain_.store_account(acc);
+    store_account(acc);
 
     // restore account addresses
     std::string prv_key;
@@ -145,14 +146,14 @@ void account_info::store(std::string& name, std::string& passwd)
         each.set_prv_key(prv_key, passwd);
         each.set_name(name);
         auto addr = std::make_shared<account_address>(each);
-        blockchain_.store_account_address(addr);
+        store_account_address(addr);
     }
 
     // restore account asset
     for(auto& each : asset_vec_) {
         each.set_issuer(name);
         auto acc = std::make_shared<asset_detail>(each);
-        blockchain_.store_account_asset(acc, name);
+        store_account_asset(acc, name);
     }
 }
 void account_info::encrypt()

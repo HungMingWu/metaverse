@@ -149,7 +149,22 @@ console_result importkeyfile::invoke(Json::Value& jv_output,
         return console_result::okay;
     }
     else {
-        account_info all_info(blockchain, auth_.auth);
+		auto store_account = [&blockchain](const std::shared_ptr<account>& acc)
+		{
+			blockchain.store_account(acc);
+		};
+
+		auto store_account_address = [&blockchain](const std::shared_ptr<account_address>& addr)
+		{
+			blockchain.store_account_address(addr);
+		};
+
+		auto store_account_asset = [&blockchain](const std::shared_ptr<asset_detail>& acc, const std::string &name)
+		{
+			blockchain.store_account_asset(acc, name);
+		};
+
+        account_info all_info(auth_.auth);
         std::stringstream ss(file_content);
         // decrypt account info file first
         ss >> all_info;
@@ -162,7 +177,8 @@ console_result importkeyfile::invoke(Json::Value& jv_output,
             throw account_existed_exception{name + std::string(" account is already exist")};
 
         // store account info to db
-        all_info.store(name, auth_.auth);
+        all_info.store(name, auth_.auth, 
+			store_account, store_account_address, store_account_asset);
 
         auto& root = jv_output;
         root["name"] = name;

@@ -6,10 +6,10 @@
 #ifndef BITCOIN_PRIMITIVES_TRANSACTION_H
 #define BITCOIN_PRIMITIVES_TRANSACTION_H
 
-#include "amount.h"
+#include "../clone/amount.h"
 #include <metaverse/bitcoin/utility/script/script.h>
-#include "serialize.h"
-#include "uint256.h"
+#include "../clone/serialize.h"
+#include "../clone/uint256.h"
 #include <metaverse/bitcoin/chain/attachment/attachment.hpp>
 
 /** An outpoint - a combination of a transaction hash and an index n into its vout */

@@ -25,11 +25,9 @@
 #include <boost/thread.hpp>
 
 #include "metaverse/blockchain/block_chain_impl.hpp"
-#include "metaverse/blockchain/transaction_pool.hpp"
 #include "metaverse/bitcoin/chain/block.hpp"
 #include "metaverse/bitcoin/chain/input.hpp"
 #include <metaverse/bitcoin/wallet/ec_public.hpp>
-#include <metaverse/blockchain/settings.hpp>
 
 namespace libbitcoin {
 namespace node {
@@ -46,7 +44,7 @@ constexpr uint32_t version = 1;
 constexpr uint64_t future_blocktime_fork_height = 1030000;
 
 extern int bucket_size;
-extern vector<uint64_t> lock_heights;
+extern std::vector<uint64_t> lock_heights;
 
 class miner
 {
@@ -57,7 +55,6 @@ public:
     typedef chain::transaction transaction;
     typedef message::transaction_message::ptr transaction_ptr;
     typedef blockchain::block_chain_impl block_chain_impl;
-    typedef blockchain::transaction_pool transaction_pool;
     typedef libbitcoin::node::p2p_node p2p_node;
 
     // prev_output_point -> (prev_block_height, prev_output)
