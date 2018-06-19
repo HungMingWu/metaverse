@@ -26,7 +26,7 @@
 #include <boost/dynamic_bitset.hpp>
 #include <boost/format.hpp>
 #include <boost/program_options.hpp>
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 #include <metaverse/client.hpp>
 
 // We use the generic helper definitions in libbitcoin to define BCX_API 

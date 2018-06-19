@@ -19,7 +19,7 @@
  */
 
 
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 #include <metaverse/client.hpp>
 #include <metaverse/explorer/callback_state.hpp>
 #include <metaverse/explorer/extensions/commands/getblockheader.hpp>

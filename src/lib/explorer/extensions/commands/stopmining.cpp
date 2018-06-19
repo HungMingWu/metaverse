@@ -19,7 +19,7 @@
  */
 
 
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 #include <metaverse/explorer/extensions/node_method_wrapper.hpp>
 #include <metaverse/explorer/extensions/commands/stopmining.hpp>
 #include <metaverse/explorer/extensions/command_extension_func.hpp>

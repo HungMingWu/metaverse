@@ -59,8 +59,6 @@ private:
 
 std::ostream& operator<<(std::ostream& out, const explorer_exception& ex);
 
-void relay_exception(std::stringstream&);
-
 
 DEFINE_EXPLORER_EXCEPTION(unknown_error_exception, 500);
 DEFINE_EXPLORER_EXCEPTION(fatal_exception, 1001);
