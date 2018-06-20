@@ -38,10 +38,8 @@ class BCN_API session_header_sync
   : public network::session_batch, track<session_header_sync>
 {
 public:
-    typedef std::shared_ptr<session_header_sync> ptr;
-
     session_header_sync(network::p2p& network, header_queue& hashes,
-        blockchain::simple_chain& blockchain,
+        blockchain::block_chain_impl& blockchain,
         const config::checkpoint::list& checkpoints);
 
     virtual void start(result_handler handler);
@@ -53,22 +51,22 @@ protected:
 
     /// Override to attach and start specialized protocols after handshake.
     virtual void attach_protocols(network::channel::ptr channel,
-        network::connector::ptr connect, result_handler handler);
+        network::SharedConnector connect, result_handler handler);
 
 private:
     bool initialize(result_handler handler);
     void handle_started(const code& ec, result_handler handler);
-    void new_connection(network::connector::ptr connect,
+    void new_connection(network::SharedConnector connect,
         result_handler handler);
     void start_syncing(const code& ec, const config::authority& host,
-        network::connector::ptr connect, result_handler handler);
+        network::SharedConnector connect, result_handler handler);
     void handle_connect(const code& ec, network::channel::ptr channel,
-        network::connector::ptr connect, result_handler handler);
-    void handle_complete(const code& ec, network::channel::ptr channel, network::connector::ptr connect,
+        network::SharedConnector connect, result_handler handler);
+    void handle_complete(const code& ec, network::channel::ptr channel, network::SharedConnector connect,
         result_handler handler);
-    void handle_channel_start(const code& ec, network::connector::ptr connect,
+    void handle_channel_start(const code& ec, network::SharedConnector connect,
         network::channel::ptr channel, result_handler handler);
-    void handle_channel_stop(const code& ec, network::connector::ptr connect, result_handler handler);
+    void handle_channel_stop(const code& ec, network::SharedConnector connect, result_handler handler);
     code get_range(config::checkpoint& out_seed, config::checkpoint& out_stop);
 
     // Thread safe.
@@ -77,7 +75,7 @@ private:
     // These do not require guard because they are not used concurrently.
     uint32_t minimum_rate_;
     config::checkpoint last_;
-    blockchain::simple_chain& blockchain_;
+    blockchain::block_chain_impl& blockchain_;
     const config::checkpoint::list checkpoints_;
     std::atomic_int try_count_;
     std::atomic_bool synced_;

@@ -33,7 +33,7 @@ namespace commands {
 console_result burn::invoke(Json::Value& jv_output,
     libbitcoin::server::server_node& node)
 {
-    auto& blockchain = node.chain_impl();
+    auto& blockchain = node.chain();
     blockchain.is_account_passwd_valid(auth_.name, auth_.auth);
 
     if (!argument_.amount)

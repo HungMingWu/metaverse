@@ -155,7 +155,7 @@ void p2p_node::handle_running(const code& ec, result_handler handler)
     log::info(LOG_NODE)
         << "Node start height is (" << height << ").";
 
-    subscribe_blockchain(
+    chain().subscribe_reorganize(
         std::bind(&p2p_node::handle_reorganized,
             this, _1, _2, _3, _4));
 
@@ -199,28 +199,28 @@ bool p2p_node::handle_reorganized(const code& ec, size_t fork_point,
 
 // Must not connect until running, otherwise imports may conflict with sync.
 // But we establish the session in network so caller doesn't need to run.
-network::session_manual::ptr p2p_node::attach_manual_session()
+std::shared_ptr<network::session_manual> p2p_node::attach_manual_session()
 {
     return attach<node::session_manual>(blockchain_, blockchain_.pool());
 }
 
-network::session_inbound::ptr p2p_node::attach_inbound_session()
+std::shared_ptr<network::session_inbound> p2p_node::attach_inbound_session()
 {
     return attach<node::session_inbound>(blockchain_, blockchain_.pool());
 }
 
-network::session_outbound::ptr p2p_node::attach_outbound_session()
+std::shared_ptr<network::session_outbound> p2p_node::attach_outbound_session()
 {
     return attach<node::session_outbound>(blockchain_, blockchain_.pool());
 }
 
-session_header_sync::ptr p2p_node::attach_header_sync_session()
+std::shared_ptr<session_header_sync> p2p_node::attach_header_sync_session()
 {
     const auto& checkpoints = blockchain_.chain_settings().checkpoints;
     return attach<session_header_sync>(hashes_, blockchain_, checkpoints);
 }
 
-session_block_sync::ptr p2p_node::attach_block_sync_session()
+std::shared_ptr<session_block_sync> p2p_node::attach_block_sync_session()
 {
     return attach<session_block_sync>(hashes_, blockchain_, settings_);
 }
@@ -266,19 +266,6 @@ block_chain_impl& p2p_node::chain_impl()
 transaction_pool& p2p_node::pool()
 {
     return blockchain_.pool();
-}
-
-// Subscriptions.
-// ----------------------------------------------------------------------------
-
-void p2p_node::subscribe_blockchain(reorganize_handler handler)
-{
-    chain().subscribe_reorganize(handler);
-}
-
-void p2p_node::subscribe_transaction_pool(transaction_handler handler)
-{
-    pool().subscribe_transaction(handler);
 }
 
 } // namspace node

@@ -103,7 +103,7 @@ void session_seed::handle_count(size_t start_size, result_handler handler)
 // Seed sequence.
 // ----------------------------------------------------------------------------
 
-void session_seed::start_seeding(size_t start_size, connector::ptr connect,
+void session_seed::start_seeding(size_t start_size, SharedConnector connect,
     result_handler handler)
 {
     // When all seeds are synchronized call session_seed::handle_complete.
@@ -118,7 +118,7 @@ void session_seed::start_seeding(size_t start_size, connector::ptr connect,
 }
 
 void session_seed::start_seed(const config::endpoint& seed,
-    connector::ptr connect, result_handler handler)
+    SharedConnector connect, result_handler handler)
 {
     if (stopped())
     {

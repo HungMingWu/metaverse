@@ -40,7 +40,6 @@ class BCT_API connector
   : public enable_shared_from_base<connector>, track<connector>
 {
 public:
-    typedef std::shared_ptr<connector> ptr;
     typedef std::function<void(const code& ec, channel::ptr)> connect_handler;
     typedef std::function<void(const asio::endpoint& endpoint)> resolve_handler;
 
@@ -90,6 +89,8 @@ private:
     std::shared_ptr<asio::resolver> resolver_;
     mutable upgrade_mutex mutex_;
 };
+
+using SharedConnector = std::shared_ptr<connector>;
 
 } // namespace network
 } // namespace libbitcoin

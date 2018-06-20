@@ -29,8 +29,16 @@
 #include <metaverse/blockchain/define.hpp>
 
 namespace libbitcoin {
+	namespace chain {
+		class account;
+		class account_address;
+	}
+}
+
+namespace libbitcoin {
 namespace blockchain {
 
+typedef console_result operation_result;
 class organizer;
 
 /// This intrface is thread safe.
@@ -132,6 +140,10 @@ public:
 
     virtual void fired() = 0; // used for removing out of date action
     virtual organizer& get_organizer() = 0;
+	virtual std::shared_ptr<libbitcoin::chain::account> is_account_passwd_valid(const std::string& name, const std::string& passwd) = 0;
+	virtual std::shared_ptr<std::vector<libbitcoin::chain::account_address>> get_account_addresses(const std::string& name) = 0;
+	virtual operation_result store_account(std::shared_ptr<libbitcoin::chain::account> acc) = 0;
+	virtual operation_result store_account_address(std::shared_ptr<libbitcoin::chain::account_address> address) = 0;
 };
 
 } // namespace blockchain

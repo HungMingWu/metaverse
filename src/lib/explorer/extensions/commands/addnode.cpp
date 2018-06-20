@@ -37,8 +37,6 @@ namespace commands {
 console_result addnode::invoke(Json::Value& jv_output,
     libbitcoin::server::server_node& node)
 {
-    auto& blockchain = node.chain_impl();
-
     administrator_required_checker(node, auth_.name, auth_.auth);
 
     const auto authority = libbitcoin::config::authority(argument_.address);

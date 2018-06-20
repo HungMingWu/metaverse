@@ -36,7 +36,7 @@ class BCB_API validate_block_impl
   : public validate_block
 {
 public:
-    validate_block_impl(simple_chain& chain, size_t fork_index,
+    validate_block_impl(block_chain_impl& chain, size_t fork_index,
         const block_detail::list& orphan_chain, size_t orphan_index,
         size_t height, const chain::block& block, bool testnet,
         const config::checkpoint::list& checkpoints,
@@ -63,7 +63,7 @@ private:
     bool orphan_is_spent(const chain::output_point& previous_output,
         size_t skip_tx, size_t skip_input) const;
 
-    simple_chain& chain_;
+	block_chain_impl& chain_;
     size_t height_;
     size_t fork_index_;
     size_t orphan_index_;

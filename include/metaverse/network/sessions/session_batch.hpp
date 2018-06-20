@@ -45,7 +45,7 @@ protected:
     session_batch(p2p& network, bool persistent);
 
     /// Create a channel from the configured number of concurrent attempts.
-    virtual void connect(connector::ptr connect, channel_handler handler);
+    virtual void connect(SharedConnector connect, channel_handler handler);
 
 private:
     typedef std::atomic<size_t> atomic_counter;
@@ -57,13 +57,13 @@ private:
         channel_handler handler);
 
     // Connect sequence
-    void new_connect(connector::ptr connect, atomic_counter_ptr counter,
+    void new_connect(SharedConnector connect, atomic_counter_ptr counter,
         channel_handler handler);
     void start_connect(const code& ec, const authority& host,
-        connector::ptr connect, atomic_counter_ptr counter,
+        SharedConnector connect, atomic_counter_ptr counter,
         channel_handler handler);
     void handle_connect(const code& ec, channel::ptr channel,
-        const authority& host, connector::ptr connect,
+        const authority& host, SharedConnector connect,
         atomic_counter_ptr counter, std::size_t count, channel_handler handler);
 
     const size_t batch_size_;

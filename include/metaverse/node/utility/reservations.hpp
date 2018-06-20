@@ -49,7 +49,7 @@ public:
 
     /// Construct a reservation table of reservations, allocating hashes evenly
     /// among the rows up to the limit of a single get headers p2p request.
-    reservations(header_queue& hashes, blockchain::simple_chain& chain,
+    reservations(header_queue& hashes, blockchain::block_chain_impl& chain,
         const settings& settings);
 
     /// The average and standard deviation of block import rates.
@@ -97,7 +97,7 @@ private:
 
     // Thread safe.
     header_queue& hashes_;
-    blockchain::simple_chain& blockchain_;
+    blockchain::block_chain_impl& blockchain_;
 
     // Protected by mutex.
     reservation::list table_;

@@ -132,14 +132,14 @@ void session::do_stop_acceptor(const code&, acceptor::ptr accept)
 }
 
 // protected:
-connector::ptr session::create_connector()
+SharedConnector session::create_connector()
 {
     const auto connect = std::make_shared<connector>(pool_, settings_);
     subscribe_stop(BIND_2(do_stop_connector, _1, connect));
     return connect;
 }
 
-void session::do_stop_connector(const code&, connector::ptr connect)
+void session::do_stop_connector(const code&, SharedConnector connect)
 {
     connect->stop();
 }

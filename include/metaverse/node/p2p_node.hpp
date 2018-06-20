@@ -39,11 +39,6 @@ class BCN_API p2p_node
   : public network::p2p
 {
 public:
-    typedef std::shared_ptr<p2p_node> ptr;
-    typedef blockchain::organizer::reorganize_handler reorganize_handler;
-    typedef blockchain::transaction_pool::transaction_handler
-        transaction_handler;
-
     /// Construct the full node.
     p2p_node(const configuration& configuration);
 
@@ -87,25 +82,16 @@ public:
     /// Transaction pool interface.
     virtual blockchain::transaction_pool& pool();
 
-    // Subscriptions.
-    // ------------------------------------------------------------------------
-
-    /// Subscribe to blockchain reorganization and stop events.
-    virtual void subscribe_blockchain(reorganize_handler handler);
-
-    /// Subscribe to transaction pool acceptance and stop events.
-    virtual void subscribe_transaction_pool(transaction_handler handler);
-
 protected:
     /// Override to attach specialized p2p sessions.
     ////network::session_seed::ptr attach_seed_session() override;
-    network::session_manual::ptr attach_manual_session() override;
-    network::session_inbound::ptr attach_inbound_session() override;
-    network::session_outbound::ptr attach_outbound_session() override;
+	std::shared_ptr<network::session_manual> attach_manual_session() override;
+	std::shared_ptr<network::session_inbound> attach_inbound_session() override;
+	std::shared_ptr<network::session_outbound> attach_outbound_session() override;
 
     /// Override to attach specialized node sessions.
-    virtual session_header_sync::ptr attach_header_sync_session();
-    virtual session_block_sync::ptr attach_block_sync_session();
+    virtual std::shared_ptr<session_header_sync> attach_header_sync_session();
+    virtual std::shared_ptr<session_block_sync> attach_block_sync_session();
 
 private:
     typedef message::block_message::ptr_list block_ptr_list;

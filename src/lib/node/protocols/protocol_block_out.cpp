@@ -170,7 +170,7 @@ bool protocol_block_out::handle_receive_get_headers(const code& ec,
     auto need_to_locate = true;
     if (locator_size > 0)
     {
-    	auto& blockchain = static_cast<simple_chain&>(static_cast<block_chain_impl&>(blockchain_));
+		auto& blockchain = static_cast<block_chain_impl&>(blockchain_);
     	uint64_t height{0};
     	auto ok = blockchain.get_height(height, message->start_hashes.back());
     	if (!ok)
@@ -181,7 +181,7 @@ bool protocol_block_out::handle_receive_get_headers(const code& ec,
 
     if (need_to_locate)
     {
-    	auto& blockchain = static_cast<simple_chain&>(static_cast<block_chain_impl&>(blockchain_));
+    	auto& blockchain = static_cast<block_chain_impl&>(blockchain_);
 		uint64_t top;
 		auto is_got = blockchain.get_last_height(top);
 		int64_t block_interval = 2000;

@@ -84,13 +84,13 @@ bool notification_worker::start()
     if(settings_.block_service_enabled)
     {
 		// Subscribe to blockchain reorganizations.
-		node_.subscribe_blockchain(
+		node_.chain().subscribe_reorganize(
 			std::bind(&notification_worker::handle_blockchain_reorganization,
 				this, _1, _2, _3, _4));
     }
 
     // Subscribe to transaction pool acceptances.
-    node_.subscribe_transaction_pool(
+    node_.pool().subscribe_transaction(
         std::bind(&notification_worker::handle_transaction_pool,
             this, _1, _2, _3));
 

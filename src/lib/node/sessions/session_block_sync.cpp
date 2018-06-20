@@ -46,7 +46,7 @@ using namespace std::placeholders;
 static const asio::seconds regulator_interval(5);
 
 session_block_sync::session_block_sync(p2p& network, header_queue& hashes,
-    simple_chain& chain, const settings& settings)
+	block_chain_impl& chain, const settings& settings)
   : session_batch(network, false),
     blockchain_(chain),
 	reservations_count_{0},
@@ -105,7 +105,7 @@ void session_block_sync::handle_started(const code& ec, result_handler handler)
 // Block sync sequence.
 // ----------------------------------------------------------------------------
 
-void session_block_sync::new_connection(connector::ptr connect,
+void session_block_sync::new_connection(SharedConnector connect,
     reservation::ptr row, result_handler handler)
 {
     if (stopped())
@@ -124,7 +124,7 @@ void session_block_sync::new_connection(connector::ptr connect,
 }
 
 void session_block_sync::handle_connect(const code& ec, channel::ptr channel,
-    connector::ptr connect, reservation::ptr row, result_handler handler)
+    SharedConnector connect, reservation::ptr row, result_handler handler)
 {
     if (ec)
     {
@@ -157,7 +157,7 @@ void session_block_sync::attach_handshake_protocols(channel::ptr channel,
 }
 
 void session_block_sync::handle_channel_start(const code& ec,
-    channel::ptr channel, connector::ptr connect, reservation::ptr row,
+    channel::ptr channel, SharedConnector connect, reservation::ptr row,
     result_handler handler)
 {
     // Treat a start failure just like a completion failure.
@@ -171,7 +171,7 @@ void session_block_sync::handle_channel_start(const code& ec,
 }
 
 void session_block_sync::attach_protocols(channel::ptr channel,
-    connector::ptr connect, reservation::ptr row, result_handler handler)
+    SharedConnector connect, reservation::ptr row, result_handler handler)
 {
     attach<protocol_ping>(channel)->start();
     attach<protocol_address>(channel)->start();
@@ -180,7 +180,7 @@ void session_block_sync::attach_protocols(channel::ptr channel,
 }
 
 void session_block_sync::handle_complete(const code& ec, channel::ptr channel,
-    network::connector::ptr connect, reservation::ptr row,
+    network::SharedConnector connect, reservation::ptr row,
     result_handler handler)
 {
     if (!ec)
@@ -213,7 +213,7 @@ void session_block_sync::handle_complete(const code& ec, channel::ptr channel,
 }
 
 void session_block_sync::handle_channel_stop(const code& ec,
-		network::connector::ptr connect, reservation::ptr row, result_handler handler)
+		network::SharedConnector connect, reservation::ptr row, result_handler handler)
 {
     log::info(LOG_NODE)
         << "Channel stopped on slot (" << row->slot() << ") " << ec.message();
@@ -224,7 +224,7 @@ void session_block_sync::handle_channel_stop(const code& ec,
 // ----------------------------------------------------------------------------
 
 // private:
-void session_block_sync::reset_timer(connector::ptr connect)
+void session_block_sync::reset_timer(SharedConnector connect)
 {
     if (stopped())
         return;
@@ -232,7 +232,7 @@ void session_block_sync::reset_timer(connector::ptr connect)
     timer_->start(BIND2(handle_timer, _1, connect));
 }
 
-void session_block_sync::handle_timer(const code& ec, connector::ptr connect)
+void session_block_sync::handle_timer(const code& ec, SharedConnector connect)
 {
     if (stopped())
         return;

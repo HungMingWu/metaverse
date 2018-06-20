@@ -40,10 +40,8 @@ class BCN_API session_block_sync
   : public network::session_batch, track<session_block_sync>
 {
 public:
-    typedef std::shared_ptr<session_block_sync> ptr;
-
     session_block_sync(network::p2p& network, header_queue& hashes,
-        blockchain::simple_chain& chain, const settings& settings);
+        blockchain::block_chain_impl& chain, const settings& settings);
 
     virtual void start(result_handler handler);
 
@@ -54,28 +52,28 @@ protected:
 
     /// Override to attach and start specialized protocols after handshake.
     virtual void attach_protocols(network::channel::ptr channel,
-        network::connector::ptr connect, reservation::ptr row,
+        network::SharedConnector connect, reservation::ptr row,
         result_handler handler);
 
 private:
     void handle_started(const code& ec, result_handler handler);
-    void new_connection(network::connector::ptr connect,
+    void new_connection(network::SharedConnector connect,
         reservation::ptr row, result_handler handler);
-    void handle_complete(const code& ec, network::channel::ptr channel, network::connector::ptr connect,
+    void handle_complete(const code& ec, network::channel::ptr channel, network::SharedConnector connect,
         reservation::ptr row, result_handler handler);
     void handle_connect(const code& ec, network::channel::ptr channel,
-        network::connector::ptr connect, reservation::ptr row,
+        network::SharedConnector connect, reservation::ptr row,
         result_handler handler);
     void handle_channel_start(const code& ec, network::channel::ptr channel,
-        network::connector::ptr connect, reservation::ptr row,
+        network::SharedConnector connect, reservation::ptr row,
         result_handler handler);
-    void handle_channel_stop(const code& ec, network::connector::ptr connect, reservation::ptr row, result_handler handler);
+    void handle_channel_stop(const code& ec, network::SharedConnector connect, reservation::ptr row, result_handler handler);
 
-    void reset_timer(network::connector::ptr connect);
-    void handle_timer(const code& ec, network::connector::ptr connect);
+    void reset_timer(network::SharedConnector connect);
+    void handle_timer(const code& ec, network::SharedConnector connect);
 
     // These are thread safe.
-    blockchain::simple_chain& blockchain_;
+    blockchain::block_chain_impl& blockchain_;
     reservations reservations_;
     deadline::ptr timer_;
     unique_mutex mutex_;

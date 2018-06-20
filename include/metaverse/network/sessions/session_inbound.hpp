@@ -41,8 +41,6 @@ class BCT_API session_inbound
   : public session, track<session_inbound>
 {
 public:
-    typedef std::shared_ptr<session_inbound> ptr;
-
     /// Construct an instance.
     session_inbound(p2p& network);
 

@@ -42,7 +42,6 @@ class BCT_API session_manual
   : public session_batch, track<session_manual>
 {
 public:
-    typedef std::shared_ptr<session_manual> ptr;
     typedef std::function<void(const code&, channel::ptr)> channel_handler;
 
     /// Construct an instance.
@@ -78,7 +77,7 @@ private:
     void handle_channel_stop(const code& ec, const std::string& hostname,
         uint16_t port);
 
-    bc::atomic<connector::ptr> connector_;
+    bc::atomic<SharedConnector> connector_;
 };
 
 } // namespace network

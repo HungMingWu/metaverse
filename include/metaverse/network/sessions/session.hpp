@@ -148,7 +148,7 @@ protected:
 
     /// Socket creators.
     virtual acceptor::ptr create_acceptor();
-    virtual connector::ptr create_connector();
+    virtual SharedConnector create_connector();
 
     /// Override to attach specialized handshake protocols upon session start.
     virtual void attach_handshake_protocols(channel::ptr channel,
@@ -175,17 +175,17 @@ private:
 
     // Socket creators.
     void do_stop_acceptor(const code& ec, acceptor::ptr connect);
-    void do_stop_connector(const code& ec, connector::ptr connect);
+    void do_stop_connector(const code& ec, SharedConnector connect);
 
     // Start sequence.
     void do_stop_session(const code&);
 
     // Connect sequence
-    void new_connect(connector::ptr connect, channel_handler handler);
+    void new_connect(SharedConnector connect, channel_handler handler);
     void start_connect(const code& ec, const authority& host,
-        connector::ptr connect, channel_handler handler);
+        SharedConnector connect, channel_handler handler);
     void handle_connect(const code& ec, channel::ptr channel,
-        const authority& host, connector::ptr connect,
+        const authority& host, SharedConnector connect,
         channel_handler handler);
 
     // Registration sequence.

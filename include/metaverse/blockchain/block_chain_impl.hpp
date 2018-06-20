@@ -43,8 +43,6 @@ using namespace libbitcoin::message;
 namespace libbitcoin {
 namespace blockchain {
 
-typedef console_result operation_result;
-
 /// The simple_chain interface portion of this class is not thread safe.
 class BCB_API block_chain_impl
   : public block_chain, public simple_chain
@@ -221,12 +219,12 @@ public:
     inline short_hash get_short_hash(const std::string& str);
 
     // account related api
-    std::shared_ptr<account> is_account_passwd_valid(const std::string& name, const std::string& passwd);
+    std::shared_ptr<account> is_account_passwd_valid(const std::string& name, const std::string& passwd) override;
     std::string is_account_lastwd_valid(const account& acc, std::string& auth, const std::string& lastwd);
     void set_account_passwd(const std::string& name, const std::string& passwd);
     bool is_account_exist(const std::string& name);
     bool is_admin_account(const std::string& name);
-    operation_result store_account(std::shared_ptr<account> acc);
+    operation_result store_account(std::shared_ptr<account> acc) override;
     std::shared_ptr<account> get_account(const std::string& name);
     std::shared_ptr<std::vector<account>> get_accounts();
     account_status get_account_user_status(const std::string& name);
@@ -315,9 +313,9 @@ public:
     std::shared_ptr<business_address_message::list> get_account_messages(const std::string& name);
 
     // account adress related api
-    operation_result store_account_address(std::shared_ptr<account_address> address);
+    operation_result store_account_address(std::shared_ptr<account_address> address) override;
     std::shared_ptr<account_address> get_account_address(const std::string& name, const std::string& address);
-    std::shared_ptr<account_address::list> get_account_addresses(const std::string& name);
+    std::shared_ptr<account_address::list> get_account_addresses(const std::string& name) override;
     void uppercase_symbol(std::string& symbol);
 
     bool is_valid_address(const std::string& address);

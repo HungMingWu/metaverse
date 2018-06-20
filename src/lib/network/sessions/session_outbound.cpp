@@ -85,7 +85,7 @@ void session_outbound::handle_started(const code& ec, result_handler handler)
 // Connnect cycle.
 // ----------------------------------------------------------------------------
 
-void session_outbound::new_connection(connector::ptr connect)
+void session_outbound::new_connection(SharedConnector connect)
 {
     if (stopped())
     {
@@ -98,7 +98,7 @@ void session_outbound::new_connection(connector::ptr connect)
     this->connect(connect, BIND3(handle_connect, _1, _2, connect));
 }
 
-void session_outbound::delay_new_connect(connector::ptr connect)
+void session_outbound::delay_new_connect(SharedConnector connect)
 {
 	auto timer = std::make_shared<deadline>(pool_, asio::seconds(2));
 	auto self = shared_from_this();
@@ -149,7 +149,7 @@ void session_outbound::delay_reseeding()
 }
 
 void session_outbound::handle_connect(const code& ec, channel::ptr channel,
-    connector::ptr connect)
+    SharedConnector connect)
 {
     if (ec)
     {
@@ -168,7 +168,7 @@ void session_outbound::handle_connect(const code& ec, channel::ptr channel,
 }
 
 void session_outbound::handle_channel_start(const code& ec,
-    connector::ptr connect, channel::ptr channel)
+    SharedConnector connect, channel::ptr channel)
 {
     // Treat a start failure just like a stop.
     if (ec)
@@ -191,7 +191,7 @@ void session_outbound::attach_protocols(channel::ptr channel)
 }
 
 void session_outbound::handle_channel_stop(const code& ec,
-    connector::ptr connect, channel::ptr channel)
+    SharedConnector connect, channel::ptr channel)
 {
     channel->invoke_protocol_start_handler(error::channel_stopped);
     log::debug(LOG_NETWORK) << "channel stopped," << ec.message();

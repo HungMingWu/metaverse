@@ -45,11 +45,11 @@ void WsPushServ::run() {
 
     node_.subscribe_stop([this](const libbitcoin::code& ec) { stop(); });
 
-    node_.subscribe_transaction_pool(
+    node_.pool().subscribe_transaction(
         std::bind(&WsPushServ::handle_transaction_pool,
             this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
     
-    node_.subscribe_blockchain(
+    node_.chain().subscribe_reorganize(
         std::bind(&WsPushServ::handle_blockchain_reorganization,
             this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4));
 

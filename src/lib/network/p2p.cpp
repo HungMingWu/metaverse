@@ -231,22 +231,22 @@ void p2p::handle_running(const code& ec, result_handler handler)
 // ----------------------------------------------------------------------------
 // Create derived sessions and override these to inject from derived p2p class.
 
-session_seed::ptr p2p::attach_seed_session()
+std::shared_ptr<session_seed> p2p::attach_seed_session()
 {
     return attach<session_seed>();
 }
 
-session_manual::ptr p2p::attach_manual_session()
+std::shared_ptr<session_manual> p2p::attach_manual_session()
 {
     return attach<session_manual>();
 }
 
-session_inbound::ptr p2p::attach_inbound_session()
+std::shared_ptr<session_inbound> p2p::attach_inbound_session()
 {
     return attach<session_inbound>();
 }
 
-session_outbound::ptr p2p::attach_outbound_session()
+std::shared_ptr<session_outbound> p2p::attach_outbound_session()
 {
     return attach<session_outbound>();
 }
@@ -454,7 +454,7 @@ p2p::address::list p2p::address_list()
     return hosts_->copy();
 }
 
-connections::ptr p2p::connections_ptr()
+std::shared_ptr<connections> p2p::connections_ptr()
 {
     return connections_;
 }

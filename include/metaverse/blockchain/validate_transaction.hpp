@@ -41,7 +41,6 @@ class BCB_API validate_transaction
   : public enable_shared_from_base<validate_transaction>
 {
 public:
-    typedef std::shared_ptr<validate_transaction> ptr;
     typedef message::transaction_message::ptr transaction_ptr;
     typedef std::function<void(const code&, transaction_ptr,
         chain::point::indexes)> validate_handler;

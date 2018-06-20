@@ -40,8 +40,6 @@ class BCT_API session_seed
   : public session, track<session_seed>
 {
 public:
-    typedef std::shared_ptr<session_seed> ptr;
-
     /// Construct an instance.
     session_seed(p2p& network);
 
@@ -57,9 +55,9 @@ protected:
 
 private:
     void handle_count(size_t start_size, result_handler handler);
-    void start_seeding(size_t start_size, connector::ptr connect,
+    void start_seeding(size_t start_size, SharedConnector connect,
         result_handler handler);
-    void start_seed(const config::endpoint& seed, connector::ptr connect,
+    void start_seed(const config::endpoint& seed, SharedConnector connect,
         result_handler handler);
     void handle_started(const code& ec, result_handler handler);
     void handle_connect(const code& ec, channel::ptr channel,

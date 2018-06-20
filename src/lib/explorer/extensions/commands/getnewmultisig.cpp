@@ -34,7 +34,7 @@ console_result getnewmultisig::invoke(
     Json::Value& jv_output,
     libbitcoin::server::server_node& node)
 {
-    auto& blockchain = node.chain_impl();
+    auto& blockchain = node.chain();
 
     // check auth
     auto account = blockchain.is_account_passwd_valid(auth_.name, auth_.auth);

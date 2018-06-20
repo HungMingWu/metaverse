@@ -39,8 +39,6 @@ class BCT_API session_outbound
   : public session_batch, track<session_outbound>
 {
 public:
-    typedef std::shared_ptr<session_outbound> ptr;
-
     /// Construct an instance.
     session_outbound(p2p& network);
 
@@ -50,19 +48,19 @@ public:
 protected:
     /// Override to attach specialized protocols upon channel start.
     virtual void attach_protocols(channel::ptr channel);
-    void delay_new_connect(connector::ptr connect);
+    void delay_new_connect(SharedConnector connect);
 
     void delay_reseeding();
 
 private:
-    void new_connection(connector::ptr connect);
+    void new_connection(SharedConnector connect);
     void handle_started(const code& ec, result_handler handler);
     void handle_connect(const code& ec, channel::ptr channel,
-        connector::ptr connect);
+        SharedConnector connect);
 
-    void handle_channel_stop(const code& ec, connector::ptr connect,
+    void handle_channel_stop(const code& ec, SharedConnector connect,
         channel::ptr channel);
-    void handle_channel_start(const code& ec, connector::ptr connect,
+    void handle_channel_start(const code& ec, SharedConnector connect,
         channel::ptr channel);
 
     std::atomic_int outbound_counter;

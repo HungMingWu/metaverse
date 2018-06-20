@@ -46,7 +46,7 @@ using namespace bc::config;
 
 #define NAME "organizer"
 
-organizer::organizer(threadpool& pool, simple_chain& chain,
+organizer::organizer(threadpool& pool, block_chain_impl& chain,
     const settings& settings)
   : stopped_(true),
     use_testnet_rules_(settings.use_testnet_rules),

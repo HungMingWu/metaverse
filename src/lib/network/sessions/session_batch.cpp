@@ -84,7 +84,7 @@ void session_batch::converge(const code& ec, channel::ptr channel,
 // ----------------------------------------------------------------------------
 
 // protected:
-void session_batch::connect(connector::ptr connect, channel_handler handler)
+void session_batch::connect(SharedConnector connect, channel_handler handler)
 {
     // synchronizer state.
     const auto mutex = std::make_shared<upgrade_mutex>();
@@ -95,7 +95,7 @@ void session_batch::connect(connector::ptr connect, channel_handler handler)
         new_connect(connect, counter, singular);
 }
 
-void session_batch::new_connect(connector::ptr connect,
+void session_batch::new_connect(SharedConnector connect,
     atomic_counter_ptr counter, channel_handler handler)
 {
     if (stopped())
@@ -111,7 +111,7 @@ void session_batch::new_connect(connector::ptr connect,
 }
 
 void session_batch::start_connect(const code& ec, const authority& host,
-    connector::ptr connect, atomic_counter_ptr counter, channel_handler handler)
+    SharedConnector connect, atomic_counter_ptr counter, channel_handler handler)
 {
     if (counter->load() == batch_size_ || ec == (code)error::service_stopped)
         return;
@@ -141,7 +141,7 @@ void session_batch::start_connect(const code& ec, const authority& host,
 }
 
 void session_batch::handle_connect(const code& ec, channel::ptr channel,
-    const authority& host, connector::ptr connect, atomic_counter_ptr counter, std::size_t count,
+    const authority& host, SharedConnector connect, atomic_counter_ptr counter, std::size_t count,
     channel_handler handler)
 {
     if (counter->load() == batch_size_)

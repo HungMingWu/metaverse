@@ -47,7 +47,6 @@ class BCT_API p2p
   : public enable_shared_from_base<p2p>
 {
 public:
-    typedef std::shared_ptr<p2p> ptr;
     typedef message::network_address address;
     typedef std::function<void()> stop_handler;
     typedef std::function<void(bool)> truth_handler;
@@ -193,7 +192,7 @@ public:
     address::list address_list();
 
     /// Get connection pool.
-    virtual connections::ptr connections_ptr();
+    virtual std::shared_ptr<connections> connections_ptr();
 
     //upnp functions
     virtual void map_port(bool use_upnp);
@@ -209,16 +208,16 @@ protected:
 
     /// Attach a session to the network, caller must start the session.
     template <class Session, typename... Args>
-    typename Session::ptr attach(Args&&... args)
+    typename std::shared_ptr<Session> attach(Args&&... args)
     {
         return std::make_shared<Session>(*this, std::forward<Args>(args)...);
     }
 
     /// Override to attach specialized sessions.
-    virtual session_seed::ptr attach_seed_session();
-    virtual session_manual::ptr attach_manual_session();
-    virtual session_inbound::ptr attach_inbound_session();
-    virtual session_outbound::ptr attach_outbound_session();
+    virtual std::shared_ptr<session_seed> attach_seed_session();
+    virtual std::shared_ptr<session_manual> attach_manual_session();
+    virtual std::shared_ptr<session_inbound> attach_inbound_session();
+    virtual std::shared_ptr<session_outbound> attach_outbound_session();
 
 private:
     void handle_manual_started(const code& ec, result_handler handler);
@@ -236,13 +235,13 @@ private:
     // These are thread safe.
     std::atomic<bool> stopped_;
     std::atomic<size_t> height_;
-    bc::atomic<session_manual::ptr> manual_;
+    bc::atomic<std::shared_ptr<session_manual>> manual_;
     threadpool threadpool_;
-    hosts::ptr hosts_;
-    connections::ptr connections_;
+	std::shared_ptr<hosts> hosts_;
+	std::shared_ptr<connections> connections_;
     stop_subscriber::ptr stop_subscriber_;
     channel_subscriber::ptr channel_subscriber_;
-    session_seed::ptr seed;
+    std::shared_ptr<session_seed> seed;
 };
 } // namespace network
 } // namespace libbitcoin

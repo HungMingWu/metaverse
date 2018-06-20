@@ -52,7 +52,7 @@ static constexpr uint32_t headers_per_second = 10000;
 
 // Sort is required here but not in configuration settings.
 session_header_sync::session_header_sync(p2p& network, header_queue& hashes,
-    simple_chain& blockchain, const checkpoint::list& checkpoints)
+	block_chain_impl& blockchain, const checkpoint::list& checkpoints)
   : session_batch(network, false),
     hashes_(hashes),
     minimum_rate_(headers_per_second),
@@ -92,7 +92,7 @@ void session_header_sync::handle_started(const code& ec,
 // Header sync sequence.
 // ----------------------------------------------------------------------------
 
-void session_header_sync::new_connection(connector::ptr connect,
+void session_header_sync::new_connection(SharedConnector connect,
     result_handler handler)
 {
     if (stopped())
@@ -107,7 +107,7 @@ void session_header_sync::new_connection(connector::ptr connect,
 }
 
 void session_header_sync::handle_connect(const code& ec, channel::ptr channel,
-    connector::ptr connect, result_handler handler)
+    SharedConnector connect, result_handler handler)
 {
     if (ec)
     {
@@ -138,7 +138,7 @@ void session_header_sync::attach_handshake_protocols(channel::ptr channel,
 }
 
 void session_header_sync::handle_channel_start(const code& ec,
-    connector::ptr connect, channel::ptr channel, result_handler handler)
+    SharedConnector connect, channel::ptr channel, result_handler handler)
 {
     // Treat a start failure just like a completion failure.
     if (ec)
@@ -151,7 +151,7 @@ void session_header_sync::handle_channel_start(const code& ec,
 }
 
 void session_header_sync::attach_protocols(channel::ptr channel,
-    connector::ptr connect, result_handler handler)
+    SharedConnector connect, result_handler handler)
 {
     attach<protocol_ping>(channel)->start();
 	attach<protocol_address>(channel)->start();
@@ -160,7 +160,7 @@ void session_header_sync::attach_protocols(channel::ptr channel,
 }
 
 void session_header_sync::handle_complete(const code& ec, channel::ptr channel,
-    network::connector::ptr connect, result_handler handler)
+    network::SharedConnector connect, result_handler handler)
 {
 	channel->stop(error::channel_stopped);
     if (!ec)
@@ -183,7 +183,7 @@ void session_header_sync::handle_complete(const code& ec, channel::ptr channel,
 //    new_connection(connect, handler);
 }
 
-void session_header_sync::handle_channel_stop(const code& ec, network::connector::ptr connect, result_handler handler)
+void session_header_sync::handle_channel_stop(const code& ec, network::SharedConnector connect, result_handler handler)
 {
     log::debug(LOG_NODE)
         << "Header sync channel stopped: " << ec.message();

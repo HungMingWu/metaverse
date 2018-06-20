@@ -52,7 +52,6 @@ class BCT_API hosts
   : public enable_shared_from_base<hosts>
 {
 public:
-    typedef std::shared_ptr<hosts> ptr;
     typedef message::network_address address;
     typedef std::function<void(const code&)> result_handler;
 
