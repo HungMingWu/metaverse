@@ -83,7 +83,7 @@ std::shared_ptr<traffic> traffic::instance_ = nullptr;
 using namespace message;
 using namespace std::placeholders;
 
-proxy::proxy(threadpool& pool, socket::ptr socket, uint32_t protocol_magic,
+proxy::proxy(threadpool& pool, SharedSocket socket, uint32_t protocol_magic,
     uint32_t protocol_version)
   : protocol_magic_(protocol_magic),
     protocol_version_(protocol_version),

@@ -32,8 +32,6 @@ class BCT_API locked_socket
   : track<locked_socket>
 {
 public:
-    typedef std::shared_ptr<locked_socket> ptr;
-
     locked_socket(asio::socket& socket, upgrade_mutex& mutex);
     ~locked_socket();
 

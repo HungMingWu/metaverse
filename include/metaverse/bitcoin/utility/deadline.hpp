@@ -41,7 +41,6 @@ class BC_API deadline
   : public enable_shared_from_base<deadline>, track<deadline>
 {
 public:
-    typedef std::shared_ptr<deadline> ptr;
     typedef std::function<void(const code&)> handler;
     
     /**
@@ -84,6 +83,8 @@ private:
     asio::duration duration_;
     mutable shared_mutex mutex_;
 };
+
+using SharedDeadline = std::shared_ptr<deadline>;
 
 } // namespace libbitcoin
 

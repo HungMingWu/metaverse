@@ -54,7 +54,7 @@ public:
     using request_callback = std::function<void()>;
 
     /// Construct an instance.
-    proxy(threadpool& pool, socket::ptr socket, uint32_t protocol_magic,
+    proxy(threadpool& pool, SharedSocket socket, uint32_t protocol_magic,
         uint32_t protocol_version);
 
     /// Validate proxy stopped.
@@ -119,7 +119,7 @@ private:
     typedef byte_source<data_chunk> payload_source;
     typedef boost::iostreams::stream<payload_source> payload_stream;
 
-    static config::authority authority_factory(socket::ptr socket);
+    static config::authority authority_factory(SharedSocket socket);
 
     void do_close();
     void stop(const boost_code& ec);
@@ -149,7 +149,7 @@ private:
     dispatcher dispatch_;
 
     // These are thread safe.
-    socket::ptr socket_;
+    SharedSocket socket_;
     std::atomic<bool> stopped_;
     std::atomic<uint32_t> peer_protocol_version_;
     bc::atomic<message::version::ptr> peer_version_message_;

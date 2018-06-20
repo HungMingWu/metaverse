@@ -75,7 +75,7 @@ private:
     // These are thread safe.
     blockchain::block_chain_impl& blockchain_;
     reservations reservations_;
-    deadline::ptr timer_;
+	SharedDeadline timer_;
     unique_mutex mutex_;
     int32_t reservations_count_;
 

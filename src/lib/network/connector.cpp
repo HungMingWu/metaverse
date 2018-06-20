@@ -262,8 +262,8 @@ void connector::handle_resolve(const boost_code& ec, asio::iterator iterator,
     ///////////////////////////////////////////////////////////////////////////
 }
 
-void connector::safe_connect(asio::iterator iterator, socket::ptr socket,
-    deadline::ptr timer, connect_handler handler)
+void connector::safe_connect(asio::iterator iterator, SharedSocket socket,
+	SharedDeadline timer, connect_handler handler)
 {
     // Critical Section (external)
     /////////////////////////////////////////////////////////////////////////// 
@@ -283,7 +283,7 @@ void connector::safe_connect(asio::iterator iterator, socket::ptr socket,
 // ----------------------------------------------------------------------------
 
 // private:
-void connector::handle_timer(const code& ec, socket::ptr socket,
+void connector::handle_timer(const code& ec, SharedSocket socket,
    connect_handler handler)
 {
     // This is the end of the timer sequence.
@@ -300,7 +300,7 @@ void connector::handle_timer(const code& ec, socket::ptr socket,
 
 // private:
 void connector::handle_connect(const boost_code& ec,
-    socket::ptr socket, deadline::ptr timer, connect_handler handler)
+    SharedSocket socket, SharedDeadline timer, connect_handler handler)
 {
     pending_.remove(socket);
     // This is the end of the connect sequence.
@@ -312,7 +312,7 @@ void connector::handle_connect(const boost_code& ec,
     timer->stop();
 }
 
-std::shared_ptr<channel> connector::new_channel(socket::ptr socket)
+std::shared_ptr<channel> connector::new_channel(SharedSocket socket)
 {
     return std::make_shared<channel>(pool_, socket, settings_);
 }

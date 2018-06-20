@@ -68,18 +68,18 @@ public:
 private:
     bool stopped();
     void close_socket(socket socket);
-    std::shared_ptr<channel> new_channel(socket::ptr socket);
+    std::shared_ptr<channel> new_channel(SharedSocket socket);
 
     void safe_stop();
     void safe_resolve(asio::query_ptr query, connect_handler handler);
-    void safe_connect(asio::iterator iterator, socket::ptr socket,
-        deadline::ptr timer, connect_handler handler);
+    void safe_connect(asio::iterator iterator, SharedSocket socket,
+		SharedDeadline timer, connect_handler handler);
 
     void handle_resolve(const boost_code& ec, asio::iterator iterator,
         connect_handler handler, resolve_handler);
-    void handle_timer(const code& ec, socket::ptr socket,
+    void handle_timer(const code& ec, SharedSocket socket,
         connect_handler handler);
-    void handle_connect(const boost_code& ec, socket::ptr socket, deadline::ptr timer, connect_handler handler);
+    void handle_connect(const boost_code& ec, SharedSocket socket, SharedDeadline timer, connect_handler handler);
 
     std::atomic<bool> stopped_;
     threadpool& pool_;

@@ -131,7 +131,7 @@ void acceptor::accept(accept_handler handler)
     ///////////////////////////////////////////////////////////////////////////
 }
 
-void acceptor::safe_accept(socket::ptr socket, accept_handler handler)
+void acceptor::safe_accept(SharedSocket socket, accept_handler handler)
 {
     // Critical Section (external)
     /////////////////////////////////////////////////////////////////////////// 
@@ -144,7 +144,7 @@ void acceptor::safe_accept(socket::ptr socket, accept_handler handler)
     /////////////////////////////////////////////////////////////////////////// 
 }
 
-void acceptor::handle_accept(const boost_code& ec, socket::ptr socket,
+void acceptor::handle_accept(const boost_code& ec, SharedSocket socket,
     accept_handler handler)
 {
     // This is the end of the accept sequence.
@@ -154,7 +154,7 @@ void acceptor::handle_accept(const boost_code& ec, socket::ptr socket,
         handler(error::success, new_channel(socket));
 }
 
-std::shared_ptr<channel> acceptor::new_channel(socket::ptr socket)
+std::shared_ptr<channel> acceptor::new_channel(SharedSocket socket)
 {
     return std::make_shared<channel>(pool_, socket, settings_);
 }

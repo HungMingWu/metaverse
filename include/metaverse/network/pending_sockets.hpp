@@ -41,15 +41,15 @@ public:
     void operator=(const pending_sockets&) = delete;
 
     virtual void clear();
-    virtual void store(socket::ptr socket);
-    virtual void remove(socket::ptr socket);
+    virtual void store(SharedSocket socket);
+    virtual void remove(SharedSocket socket);
 
 private:
-    typedef std::vector<socket::ptr> list;
+    typedef std::vector<SharedSocket> list;
 
     bool safe_clear();
-    bool safe_store(socket::ptr socket);
-    bool safe_remove(socket::ptr socket);
+    bool safe_store(SharedSocket socket);
+    bool safe_remove(SharedSocket socket);
 
     list sockets_;
     mutable shared_mutex mutex_;

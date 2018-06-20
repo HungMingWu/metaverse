@@ -41,7 +41,7 @@ config::authority socket::get_authority() const
     return ec ? config::authority() : config::authority(endpoint);
 }
 
-locked_socket::ptr socket::get_socket()
+std::shared_ptr<locked_socket> socket::get_socket()
 {
     return std::make_shared<locked_socket>(socket_, mutex_);
 }

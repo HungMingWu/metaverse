@@ -64,9 +64,9 @@ public:
 
 private:
     code safe_listen(uint16_t port);
-    void safe_accept(socket::ptr socket, accept_handler handler);
-    std::shared_ptr<channel> new_channel(socket::ptr socket);
-    void handle_accept(const boost_code& ec, socket::ptr socket,
+    void safe_accept(SharedSocket socket, accept_handler handler);
+    std::shared_ptr<channel> new_channel(SharedSocket socket);
+    void handle_accept(const boost_code& ec, SharedSocket socket,
         accept_handler handler);
 
     threadpool& pool_;

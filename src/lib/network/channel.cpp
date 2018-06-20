@@ -37,7 +37,7 @@ using namespace bc::message;
 using namespace std::placeholders;
 
 // Factory for deadline timer pointer construction.
-static deadline::ptr alarm(threadpool& pool, const asio::duration& duration)
+static SharedDeadline alarm(threadpool& pool, const asio::duration& duration)
 {
     return std::make_shared<deadline>(pool, pseudo_randomize(duration));
 }
@@ -48,7 +48,7 @@ static deadline::ptr alarm(threadpool& pool, const asio::duration& duration)
 // On handshake send peer version.maxiumum and on receipt of protocol_peer
 // if it is below protocol_minimum drop the channel, otherwise set
 // protocol_version to the lesser of protocol_maximum and protocol_peer.
-channel::channel(threadpool& pool, socket::ptr socket,
+channel::channel(threadpool& pool, SharedSocket socket,
     const settings& settings)
   : proxy(pool, socket, settings.identifier, settings.protocol),
     notify_(false),

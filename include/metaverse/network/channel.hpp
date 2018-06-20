@@ -44,7 +44,7 @@ public:
     typedef std::shared_ptr<channel> ptr;
 
     /// Construct an instance.
-    channel(threadpool& pool, socket::ptr socket, const settings& settings);
+    channel(threadpool& pool, SharedSocket socket, const settings& settings);
 
     void start(result_handler handler) override;
 
@@ -73,8 +73,8 @@ private:
 
     bool notify_;
     uint64_t nonce_;
-    deadline::ptr expiration_;
-    deadline::ptr inactivity_;
+	SharedDeadline expiration_;
+	SharedDeadline inactivity_;
     std::function<void()> protocol_start_handler_;
     upgrade_mutex mutex_;
 };

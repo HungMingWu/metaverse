@@ -67,7 +67,7 @@ private:
     void handle_notify(const code& ec, event_handler handler);
 
     const bool perpetual_;
-    deadline::ptr timer_;
+	SharedDeadline timer_;
 };
 
 } // namespace network

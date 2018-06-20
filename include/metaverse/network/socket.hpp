@@ -33,8 +33,6 @@ class BCT_API socket
   : public track<socket>
 {
 public:
-    typedef std::shared_ptr<socket> ptr;
-
     /// Construct an instance.
     socket(threadpool& pool);
 
@@ -43,7 +41,7 @@ public:
     void operator=(const socket&) = delete;
 
     /// Obtain an exclusive reference to the socket.
-    locked_socket::ptr get_socket();
+	std::shared_ptr<locked_socket> get_socket();
 
     /// Obtain the authority of the remote endpoint.
     config::authority get_authority() const;
@@ -56,6 +54,7 @@ private:
     mutable upgrade_mutex mutex_;
 };
 
+using SharedSocket = std::shared_ptr<socket>;
 } // namespace network
 } // namespace libbitcoin
 
