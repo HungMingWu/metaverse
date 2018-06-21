@@ -29,12 +29,10 @@ namespace libbitcoin {
 namespace node {
 
 #define NAME "transaction"
-#define CLASS protocol_transaction_in
 
 using namespace bc::blockchain;
 using namespace bc::message;
 using namespace bc::network;
-using namespace std::placeholders;
 
 // TODO: derive from protocol_session_node abstract intermediate base class.
 // TODO: Pass p2p_node on construct, obtaining node configuration settings.
@@ -140,7 +138,11 @@ bool protocol_transaction_in::handle_receive_inventory(const code& ec,
     log::trace(LOG_NODE) << "protocol_transaction_in::handle_receive_inventory pool filter," << hash;
     // This is returned on a new thread.
     // Remove matching transaction hashes found in the transaction pool.
-    pool_.filter(response, BIND2(handle_filter_floaters, _1, response));
+	auto handle_filter_floaters = [=, self = shared_from_base<protocol_transaction_in>()]
+		(const code& ec) {
+			return self->handle_filter_floaters(ec, response);
+		};
+	pool_.filter(response, handle_filter_floaters);
     return true;
 }
 
@@ -161,8 +163,11 @@ void protocol_transaction_in::handle_filter_floaters(const code& ec,
     }
 
     // BUGBUG: this removes spent transactions which it should not (see BIP30).
-    blockchain_.filter_transactions(message,
-        BIND2(send_get_data, _1, message));
+	auto send_get_data = [=, self = shared_from_base<protocol_transaction_in>()]
+		(const code& ec) {
+			return self->send_get_data(ec, message);
+		};
+	blockchain_.filter_transactions(message, send_get_data);
 }
 
 void protocol_transaction_in::send_get_data(const code& ec,

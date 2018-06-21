@@ -28,8 +28,6 @@
 
 namespace libbitcoin {
 
-using std::placeholders::_1;
-
 // This protects timer_ against concurrent access with no chance of deadlock.
 // This can be dereferenced with an outstanding callback because the timer
 // closure captures an instance of this class and the callback.
@@ -48,9 +46,9 @@ void deadline::start(handler handle)
 
 void deadline::start(handler handle, const asio::duration duration)
 {
-    const auto timer_handler =
-        std::bind(&deadline::handle_timer,
-            shared_from_this(), _1, handle);
+	const auto timer_handler = [=, self = shared_from_this()](const boost_code& ec) {
+		return self->handle_timer(ec, handle);
+	};
 
     // Critical Section
     ///////////////////////////////////////////////////////////////////////////

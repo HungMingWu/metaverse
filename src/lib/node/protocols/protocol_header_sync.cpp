@@ -77,8 +77,17 @@ size_t protocol_header_sync::sync_rate() const
 
 void protocol_header_sync::start(event_handler handler)
 {
-    auto complete = synchronize(BIND2(headers_complete, _1, handler), 1, NAME);
-    protocol_timer::start(expiry_interval, BIND2(handle_event, _1, complete));
+	auto headers_complete = [=, self = shared_from_base<protocol_header_sync>()]
+		(const code& ec) {
+			return self->headers_complete(ec, handler);
+		};
+    auto complete = synchronize(headers_complete, 1, NAME);
+	auto handle_event = [=, self = shared_from_base<protocol_header_sync>()]
+		(const code& ec) {
+			return self->handle_event(ec, complete);
+		};
+
+    protocol_timer::start(expiry_interval, handle_event);
 
 	subscribe<headers>([self = shared_from_base<protocol_header_sync>(), complete]
 		(const code& ec, headers_ptr message) {

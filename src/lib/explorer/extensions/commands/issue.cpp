@@ -27,8 +27,6 @@
 #include <metaverse/explorer/extensions/base_helper.hpp>
 #include <metaverse/bitcoin/chain/attachment/asset/asset_detail.hpp>
 
-using std::placeholders::_1;
-
 namespace libbitcoin {
 namespace explorer {
 namespace commands {

@@ -32,7 +32,6 @@ namespace node {
     
 using namespace bc::blockchain;
 using namespace bc::network;
-using namespace std::placeholders;
 
 session_manual::session_manual(p2p& network, block_chain& blockchain,
     transaction_pool& pool)
