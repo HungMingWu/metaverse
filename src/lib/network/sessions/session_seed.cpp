@@ -73,7 +73,10 @@ void session_seed::handle_started(const code& ec, result_handler handler)
         return;
     }
 
-    address_count(BIND2(handle_count, _1, handler));
+	auto handle_count = [=, self = shared_from_base<session_seed>()](size_t start_size) {
+		return self->handle_count(start_size, handler);
+	};
+	address_count(handle_count);
 }
 
 void session_seed::handle_count(size_t start_size, result_handler handler)
@@ -107,8 +110,9 @@ void session_seed::start_seeding(size_t start_size, SharedConnector connect,
     result_handler handler)
 {
     // When all seeds are synchronized call session_seed::handle_complete.
-    auto all = BIND2(handle_complete, start_size, handler);
-
+	auto all = [=, self = shared_from_base<session_seed>()](const code& ec) {
+		return self->handle_complete(start_size, handler);
+	};
     // Synchronize each individual seed before calling handle_complete.
     auto each = synchronize(all, settings_.seeds.size(), NAME, true);
 
@@ -132,7 +136,11 @@ void session_seed::start_seed(const config::endpoint& seed,
         << "Contacting seed [" << seed << "]";
 
     // OUTBOUND CONNECT
-    connect->connect(seed, BIND4(handle_connect, _1, _2, seed, handler), [this](const asio::endpoint& endpoint){
+	auto handle_connect = [=, self = shared_from_base<session_seed>()]
+		(const code& ec, channel::ptr channel) {
+			return self->handle_connect(ec, channel, seed, handler);
+		};
+    connect->connect(seed, handle_connect, [this](const asio::endpoint& endpoint){
     	network_.store(config::authority{endpoint}.to_network_address(), [](const code& ec){});
     	log::debug(LOG_NETWORK) << "session seed store," << endpoint ;
     });
@@ -161,9 +169,17 @@ void session_seed::handle_connect(const code& ec, channel::ptr channel,
     log::info(LOG_NETWORK)
         << "Connected seed [" << seed << "] as " << channel->authority();
 
+	auto handle_started = [=, self = shared_from_base<session_seed>()]
+		(const code& ec) {
+			return self->handle_channel_start(ec, channel, handler);
+		};
+	auto handle_stopped = [self = shared_from_base<session_seed>()]
+		(const code& ec) {
+			return self->handle_channel_stop(ec);
+		};
     register_channel(channel, 
-        BIND3(handle_channel_start, _1, channel, handler),
-        BIND1(handle_channel_stop, _1));
+		handle_started,
+		handle_stopped);
 }
 
 void session_seed::handle_channel_start(const code& ec, channel::ptr channel,
@@ -194,7 +210,10 @@ void session_seed::handle_channel_stop(const code& ec)
 // This accepts no error code because individual seed errors are suppressed.
 void session_seed::handle_complete(size_t start_size, result_handler handler)
 {
-    address_count(BIND3(handle_final_count, _1, start_size, handler));
+	auto handle_final_count = [=, self = shared_from_base<session_seed>()](size_t current_size) {
+		return self->handle_final_count(current_size, start_size, handler);
+	};
+    address_count(handle_final_count);
 
     log::info(LOG_NETWORK)
             << "session_seed complete!";

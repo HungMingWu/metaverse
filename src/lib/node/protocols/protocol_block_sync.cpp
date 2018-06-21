@@ -55,10 +55,19 @@ protocol_block_sync::protocol_block_sync(p2p& network, channel::ptr channel,
 
 void protocol_block_sync::start(event_handler handler)
 {
-    auto complete = synchronize(BIND2(blocks_complete, _1, handler), 1, NAME);
-    protocol_timer::start(expiry_interval, BIND2(handle_event, _1, complete));
+	auto handler_ = [this, handler](const code& ec) {
+		return blocks_complete(ec, handler);
+	};
+	auto complete = synchronize(handler_, 1, NAME);
+	auto handle_event_ = [this, complete](const code& ec) {
+		return handle_event(ec, complete);
+	};
+	protocol_timer::start(expiry_interval, handle_event_);
 
-    SUBSCRIBE3(block_message, handle_receive, _1, _2, complete);
+	subscribe<block_message>([self = shared_from_base<protocol_block_sync>(), complete]
+		(const code& ec, block_ptr message) {
+		return self->handle_receive(ec, message, complete);
+	});
 
     // This is the end of the start sequence.
     send_get_blocks(complete, true);
@@ -91,7 +100,10 @@ void protocol_block_sync::send_get_blocks(event_handler complete, bool reset)
         << "Sending request of " << request.inventories.size()
         << " hashes for slot (" << reservation_->slot() << ").";
 
-    SEND2(request, handle_send, _1, complete);
+	send(request, [=, self = shared_from_base<protocol_block_sync>()]
+		(const code& ec) {
+			return self->handle_send(ec, complete);
+		});
 }
 
 void protocol_block_sync::handle_send(const code& ec, event_handler complete)

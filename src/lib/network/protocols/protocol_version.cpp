@@ -90,11 +90,21 @@ void protocol_version::start(event_handler handler)
     complete_handler_ = handler;
 
     // The handler is invoked in the context of the last message receipt.
+	auto handler1 = [self = shared_from_base<protocol_version>()]
+		(const code& ec) {
+			return self->handle_complete(ec);
+		};
     protocol_timer::start(settings.channel_handshake(),
-        synchronize(BIND1(handle_complete, _1), 2, NAME, false));
+        synchronize(handler1, 2, NAME, false));
 
-    SUBSCRIBE2(version, handle_receive_version, _1, _2);
-    SUBSCRIBE2(verack, handle_receive_verack, _1, _2);
+	subscribe<version>([self = shared_from_base<protocol_version>()]
+		(const code& ec, version::ptr message) {
+			return self->handle_receive_version(ec, message);
+		});
+	subscribe<verack>([self = shared_from_base<protocol_version>()]
+		(const code& ec, verack::ptr message) {
+			return self->handle_receive_verack(ec, message);
+		});
     send_version(version_factory(authority(), settings, nonce(), height));
 }
 
@@ -108,7 +118,10 @@ void protocol_version::handle_complete(const code& ec)
 
 void protocol_version::send_version(const message::version& self)
 {
-    SEND1(self, handle_version_sent, _1);
+	send(self, [self = shared_from_base<protocol_version>()]
+		(const code& ec) {
+			return self->handle_version_sent(ec);
+		});
 }
 
 // Protocol.
@@ -135,7 +148,10 @@ bool protocol_version::handle_receive_version(const code& ec,
         << message->timestamp << ") " << message->user_agent;
 
     set_peer_version(message);
-    SEND1(verack(), handle_verack_sent, _1);
+	send(verack(), [self = shared_from_base<protocol_version>()]
+		(const code& ec) {
+			return self->handle_verack_sent(ec);
+		});
 
     // 1 of 2
     set_event(error::success);

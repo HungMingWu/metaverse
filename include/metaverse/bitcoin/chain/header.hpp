@@ -47,8 +47,6 @@ class BC_API header
 {
 public:
     typedef std::vector<header> list;
-    typedef std::shared_ptr<header> ptr;
-    typedef std::vector<ptr> ptr_list;
 
     static uint64_t satoshi_fixed_size_without_transaction_count();
 

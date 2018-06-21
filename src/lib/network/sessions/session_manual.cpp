@@ -98,8 +98,10 @@ void session_manual::start_connect(const std::string& hostname, uint16_t port,
     BITCOIN_ASSERT_MSG(connector, "The manual session was not started.");
 
     // MANUAL CONNECT OUTBOUND
-    connector->connect(hostname, port,
-        BIND6(handle_connect, _1, _2, hostname, port, handler, retries - 1));
+	auto connectFunc = [=, self = shared_from_base<session_manual>()](const code& ec, channel::ptr channel) {
+		return self->handle_connect(ec, channel, hostname, port, handler, retries - 1);
+	};
+	connector->connect(hostname, port, connectFunc);
 }
 
 void session_manual::handle_connect(const code& ec, channel::ptr channel,
@@ -130,9 +132,18 @@ void session_manual::handle_connect(const code& ec, channel::ptr channel,
         << "Connected manual channel [" << config::endpoint(hostname, port)
         << "] as [" << channel->authority() << "]";
 
-    register_channel(channel, 
-        BIND5(handle_channel_start, _1, hostname, port, channel, handler),
-        BIND3(handle_channel_stop, _1, hostname, port));
+	auto handle_started = [=, self = shared_from_base<session_manual>()]
+		(const code& ec) {
+			return self->handle_channel_start(ec, hostname, port, channel, handler);
+		};
+	auto handle_stopped = [=, self = shared_from_base<session_manual>()]
+		(const code& ec) {
+			return self->handle_channel_stop(ec, hostname, port);
+		};
+
+	register_channel(channel,
+		handle_started,
+		handle_stopped);
 }
 
 void session_manual::handle_channel_start(const code& ec,

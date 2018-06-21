@@ -119,8 +119,11 @@ void session_block_sync::new_connection(SharedConnector connect,
         << "Starting slot (" << row->slot() << ").";
 
     // BLOCK SYNC CONNECT
-    this->connect(connect,
-        BIND5(handle_connect, _1, _2, connect, row, handler));
+	auto connectFunc = [=, self = shared_from_base<session_block_sync>()]
+		(const code& ec, channel::ptr channel) {
+			return self->handle_connect(ec, channel, connect, row, handler);
+		};
+    this->connect(connect, connectFunc);
 }
 
 void session_block_sync::handle_connect(const code& ec, channel::ptr channel,
@@ -145,9 +148,17 @@ void session_block_sync::handle_connect(const code& ec, channel::ptr channel,
         << "Connected slot (" << row->slot() << ") ["
         << channel->authority() << "]";
 
+	auto handle_started = [=, self = shared_from_base<session_block_sync>()]
+		(const code& ec) {
+			return self->handle_channel_start(ec, channel, connect, row, handler);
+		};
+	auto handle_stopped = [=, self = shared_from_base<session_block_sync>()]
+		(const code& ec) {
+			return self->handle_channel_stop(ec, connect, row, handler);
+		};
     register_channel(channel,
-        BIND5(handle_channel_start, _1, channel, connect, row, handler),
-        BIND4(handle_channel_stop, _1, connect, row, handler));
+		handle_started,
+		handle_stopped);
 }
 
 void session_block_sync::attach_handshake_protocols(channel::ptr channel,
@@ -175,8 +186,11 @@ void session_block_sync::attach_protocols(channel::ptr channel,
 {
     attach<protocol_ping>(channel)->start();
     attach<protocol_address>(channel)->start();
-	attach<protocol_block_sync>(channel, row)->start(
-		BIND5(handle_complete, _1, channel, connect, row, handler));
+	auto handle_complete = [=, self = shared_from_base<session_block_sync>()]
+		(const code& ec) {
+			return self->handle_complete(ec, channel, connect, row, handler);
+		};
+	attach<protocol_block_sync>(channel, row)->start(handle_complete);
 }
 
 void session_block_sync::handle_complete(const code& ec, channel::ptr channel,
@@ -229,7 +243,10 @@ void session_block_sync::reset_timer(SharedConnector connect)
     if (stopped())
         return;
 
-    timer_->start(BIND2(handle_timer, _1, connect));
+	auto handle_timer = [=, self = shared_from_base<session_block_sync>()](const code& ec) {
+		return self->handle_timer(ec, connect);
+	};
+	timer_->start(handle_timer);
 }
 
 void session_block_sync::handle_timer(const code& ec, SharedConnector connect)

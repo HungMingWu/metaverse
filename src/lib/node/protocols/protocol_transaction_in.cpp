@@ -58,9 +58,18 @@ protocol_transaction_in::protocol_transaction_in(p2p& network,
 
 protocol_transaction_in::ptr protocol_transaction_in::do_subscribe()
 {
-    SUBSCRIBE2(inventory, handle_receive_inventory, _1, _2);
-    SUBSCRIBE2(transaction_message, handle_receive_transaction, _1, _2);
-    protocol_events::start(BIND1(handle_stop, _1));
+	subscribe<inventory>([self = shared_from_base<protocol_transaction_in>()]
+		(const code& ec, inventory_ptr message) {
+			return self->handle_receive_inventory(ec, message);
+		});
+	subscribe<transaction_message>([self = shared_from_base<protocol_transaction_in>()]
+		(const code& ec, transaction_ptr message) {
+			return self->handle_receive_transaction(ec, message);
+		});
+	protocol_events::start([self = shared_from_base<protocol_transaction_in>()]
+		(const code& ec) {
+			return self->handle_stop(ec);
+		});
     return std::dynamic_pointer_cast<protocol_transaction_in>(protocol::shared_from_this());
 }
 
@@ -76,11 +85,18 @@ void protocol_transaction_in::start()
     {
         log::trace(LOG_NODE) << "protocol transaction in refresh pool";
         // Refresh transaction pool on connect.
-        SEND2(memory_pool(), handle_send, _1, memory_pool::command);
+		send(memory_pool(), [=, self = shared_from_base<protocol_transaction_in>()]
+			(const code& ec) {
+				return self->handle_send(ec, memory_pool::command);
+			});
 
         // Refresh transaction pool on blockchain reorganization.
-        blockchain_.subscribe_reorganize(
-            BIND4(handle_reorganized, _1, _2, _3, _4));
+		auto handle_reorganized = [self = shared_from_base<protocol_transaction_in>()]
+			(const code& ec, size_t fork_point,
+				const block_ptr_list& incoming, const block_ptr_list& outgoing) {
+				return self->handle_reorganized(ec, fork_point, incoming, outgoing);
+			};
+		blockchain_.subscribe_reorganize(handle_reorganized);
         if (channel_stopped()) {
 			blockchain_.fired();
 		}
@@ -166,7 +182,10 @@ void protocol_transaction_in::send_get_data(const code& ec,
     }
     log::trace(LOG_NODE) << "protocol_transaction_in::send_get_data";
     // inventory->get_data[transaction]
-    SEND2(*message, handle_send, _1, message->command);
+	send(*message, [=, self = shared_from_base<protocol_transaction_in>()]
+		(const code& ec) {
+			return self->handle_send(ec, message->command);
+		});
 }
 
 // Receive transaction sequence.
@@ -200,9 +219,18 @@ bool protocol_transaction_in::handle_receive_transaction(const code& ec,
     log::debug(LOG_NODE)
         << "Potential transaction from [" << authority() << "]." << encode_hash(message->hash());
 
-    pool_.store(message,
-        BIND2(handle_store_confirmed, _1, _2),
-        BIND3(handle_store_validated, _1, _2, _3));
+	auto handle_store_confirmed = [=, self = shared_from_base<protocol_transaction_in>()]
+		(const code& ec, transaction_ptr message) {
+			return self->handle_store_confirmed(ec, message);
+		};
+	auto handle_store_validated = [=, self = shared_from_base<protocol_transaction_in>()]
+		(const code& ec,
+			transaction_ptr message, const index_list& unconfirmed) {
+			return self->handle_store_validated(ec, message, unconfirmed);
+		};
+	pool_.store(message,
+		handle_store_confirmed,
+		handle_store_validated);
     return true;
 }
 
@@ -261,7 +289,10 @@ bool protocol_transaction_in::handle_reorganized(const code& ec, size_t,
     if (outgoing.empty())
         return true;
 
-    SEND2(memory_pool(), handle_send, _1, memory_pool::command);
+	send(memory_pool(), [self = shared_from_base<protocol_transaction_in>()]
+		(const code& ec) {
+			return self->handle_send(ec, memory_pool::command);
+		});
     return true;
 }
 

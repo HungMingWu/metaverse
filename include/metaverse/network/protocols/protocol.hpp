@@ -32,20 +32,6 @@
 namespace libbitcoin {
 namespace network {
 
-#define PROTOCOL_ARGS(handler, args) \
-    std::forward<Handler>(handler), \
-    shared_from_base<Protocol>(), \
-    std::forward<Args>(args)...
-#define BOUND_PROTOCOL(handler, args) \
-    std::bind(PROTOCOL_ARGS(handler, args))
-
-#define PROTOCOL_ARGS_TYPE(handler, args) \
-    std::forward<Handler>(handler), \
-    std::shared_ptr<Protocol>(), \
-    std::forward<Args>(args)...
-#define BOUND_PROTOCOL_TYPE(handler, args) \
-    std::bind(PROTOCOL_ARGS_TYPE(handler, args))
-
 class p2p;
 
 /// Virtual base class for protocol implementation, mostly thread safe.
@@ -65,34 +51,24 @@ protected:
     protocol(const protocol&) = delete;
     void operator=(const protocol&) = delete;
 
-    /// Bind a method in the derived class.
-    template <class Protocol, typename Handler, typename... Args>
-    auto bind(Handler&& handler, Args&&... args) ->
-        decltype(BOUND_PROTOCOL_TYPE(handler, args))
-    {
-        return BOUND_PROTOCOL(handler, args);
-    }
-
     /// Send a message on the channel and handle the result.
-    template <class Protocol, class Message, typename Handler, typename... Args>
-    void send(Message&& packet, Handler&& handler, Args&&... args)
-    {
-        channel_->send(std::forward<Message>(packet),
-            BOUND_PROTOCOL(handler, args));
-    }
-
+	template <class Message, typename Handler>
+	void send(Message&& packet, Handler&& handler)
+	{
+		channel_->send(std::forward<Message>(packet), handler);
+	}
     /// Subscribe to all channel messages, blocking until subscribed.
-    template <class Protocol, class Message, typename Handler, typename... Args>
-    void subscribe(Handler&& handler, Args&&... args)
-    {
-        channel_->template subscribe<Message>(BOUND_PROTOCOL(handler, args));
-    }
+	template <class Message, typename Handler>
+	void subscribe(Handler&& handler)
+	{
+		channel_->template subscribe<Message>(handler);
+	}
 
     /// Subscribe to the channel stop, blocking until subscribed.
-    template <class Protocol, typename Handler, typename... Args>
-    void subscribe_stop(Handler&& handler, Args&&... args)
+    template <typename Handler>
+    void subscribe_stop(Handler&& handler)
     {
-        channel_->subscribe_stop(BOUND_PROTOCOL(handler, args));
+        channel_->subscribe_stop(handler);
     }
 
     /// Get the address of the channel.
@@ -129,36 +105,6 @@ private:
     channel::ptr channel_;
     const std::string name_;
 };
-
-#undef PROTOCOL_ARGS
-#undef BOUND_PROTOCOL
-#undef PROTOCOL_ARGS_TYPE
-#undef BOUND_PROTOCOL_TYPE
-
-#define BIND1(method, p1) \
-    bind<CLASS>(&CLASS::method, p1)
-#define BIND2(method, p1, p2) \
-    bind<CLASS>(&CLASS::method, p1, p2)
-#define BIND3(method, p1, p2, p3) \
-    bind<CLASS>(&CLASS::method, p1, p2, p3)
-
-#define SEND1(message, method, p1) \
-    send<CLASS>(message, &CLASS::method, p1)
-#define SEND2(message, method, p1, p2) \
-    send<CLASS>(message, &CLASS::method, p1, p2)
-#define SEND3(message, method, p1, p2, p3) \
-    send<CLASS>(message, &CLASS::method, p1, p2, p3)
-
-#define SUBSCRIBE2(message, method, p1, p2) \
-    subscribe<CLASS, message>(&CLASS::method, p1, p2)
-#define SUBSCRIBE3(message, method, p1, p2, p3) \
-    subscribe<CLASS, message>(&CLASS::method, p1, p2, p3)
-#define SUBSCRIBE4(message, method, p1, p2, p3, p4) \
-    subscribe<CLASS, message>(&CLASS::method, p1, p2, p3, p4)
-
-
-#define SUBSCRIBE_STOP1(method, p1) \
-    subscribe_stop<CLASS>(&CLASS::method, p1)
 
 } // namespace network
 } // namespace libbitcoin

@@ -41,7 +41,10 @@ protocol_miner::protocol_miner(network::p2p& network
 void protocol_miner::start()
 {
 	using namespace std::placeholders;
-	protocol_events::start(BIND1(handle_stop, _1));
+	protocol_events::start([self = shared_from_base<protocol_miner>()]
+		(const code& ec) {
+			return self->handle_stop(ec);
+		});
 //	pool_.subscribe_transaction(BIND3(handle_accept_transaction, _1, _2, _3));
 }
 

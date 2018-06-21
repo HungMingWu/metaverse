@@ -50,7 +50,10 @@ void protocol_seed::start(event_handler handler)
 {
     const auto& settings = network_.network_settings();
 
-    auto complete = BIND2(handle_seeding_complete, _1, handler);
+	auto complete = [=, self = shared_from_base<protocol_seed>()](const code& ec)
+	{
+		return self->handle_seeding_complete(ec, handler);
+	};
 
     if (settings.host_pool_capacity == 0)
     {
@@ -61,9 +64,15 @@ void protocol_seed::start(event_handler handler)
     protocol_timer::start(settings.channel_germination(),
         synchronize(complete, 3, NAME, false));
 
-    SUBSCRIBE2(address, handle_receive_address, _1, _2);
+	subscribe<address>([self = shared_from_base<protocol_seed>()]
+		(const code& ec, address::ptr message) {
+			return self->handle_receive_address(ec, message);
+		});
     send_own_address(settings);
-    SEND1(get_address(), handle_send_get_address, _1);
+	send(get_address(), [self = shared_from_base<protocol_seed>()]
+		(const code& ec) {
+			return self->handle_send_get_address(ec);
+		});
 }
 
 // Protocol.
@@ -78,7 +87,10 @@ void protocol_seed::send_own_address(const settings& settings)
     }
 
     const address self({ { settings.self.to_network_address() } });
-    SEND1(self, handle_send_address, _1);
+	send(self, [self = shared_from_base<protocol_seed>()]
+		(const code& ec) {
+			return self->handle_send_address(ec);
+		});
 }
 
 void protocol_seed::handle_seeding_complete(const code& ec,
@@ -108,7 +120,11 @@ bool protocol_seed::handle_receive_address(const code& ec,
         << message->addresses.size() << ")";
 
     // TODO: manage timestamps (active channels are connected < 3 hours ago).
-    network_.store(message->addresses, BIND1(handle_store_addresses, _1));
+	auto handler = [self = shared_from_base<protocol_seed>()]
+		(const code& ec) {
+			return self->handle_store_addresses(ec);
+		};
+    network_.store(message->addresses, handler);
 
     return false;
 }

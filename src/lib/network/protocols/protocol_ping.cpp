@@ -45,8 +45,15 @@ protocol_ping::protocol_ping(p2p& network, channel::ptr channel)
 
 protocol_ping::ptr protocol_ping::do_subscribe()
 {
-    SUBSCRIBE2(ping, handle_receive_ping, _1, _2);
-    protocol_timer::start(settings_.channel_heartbeat(), BIND1(send_ping, _1));
+	subscribe<ping>([self = shared_from_base<protocol_ping>()]
+		(const code& ec, message::ping::ptr message) {
+			return self->handle_receive_ping(ec, message);
+		});
+	protocol_timer::start(settings_.channel_heartbeat(), 
+		[self = shared_from_base<protocol_ping>()]
+		(const code& ec) {
+			return self->send_ping(ec);
+		});
     return std::dynamic_pointer_cast<protocol_ping>(protocol::shared_from_this());
 }
 
@@ -76,8 +83,14 @@ void protocol_ping::send_ping(const code& ec)
 
     const auto nonce = pseudo_random();
 
-    SUBSCRIBE3(pong, handle_receive_pong, _1, _2, nonce);
-    SEND2(ping{ nonce }, handle_send, _1, pong::command);
+	subscribe<pong>([self = shared_from_base<protocol_ping>(), nonce]
+		(const code& ec, message::pong::ptr message) {
+			return self->handle_receive_pong(ec, message, nonce);
+		});
+	send(ping{ nonce }, [self = shared_from_base<protocol_ping>()]
+		(const code& ec) {
+			return self->handle_send(ec, pong::command);
+		});
 }
 
 bool protocol_ping::handle_receive_ping(const code& ec,
@@ -95,7 +108,10 @@ bool protocol_ping::handle_receive_ping(const code& ec,
         return false;
     }
 
-    SEND2(pong{ message->nonce }, handle_send, _1, pong::command);
+	send(pong{ message->nonce }, [self = shared_from_base<protocol_ping>()]
+		(const code& ec) {
+			return self->handle_send(ec, pong::command);
+		});
 
     // RESUBSCRIBE
     return true;

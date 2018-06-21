@@ -38,22 +38,6 @@
 namespace libbitcoin {
 namespace network {
 
-// Base session type.
-
-#define BASE_ARGS(handler, args) \
-    std::forward<Handler>(handler), \
-    shared_from_this(), \
-    std::forward<Args>(args)...
-#define BOUND_BASE(handler, args) \
-    std::bind(BASE_ARGS(handler, args))
-
-#define BASE_ARGS_TYPE(handler, args) \
-    std::forward<Handler>(handler), \
-    std::shared_ptr<session>(), \
-    std::forward<Args>(args)...
-#define BOUND_BASE_TYPE(handler, args) \
-    std::bind(BASE_ARGS_TYPE(handler, args))
-
 // Derived session types.
 
 #define SESSION_ARGS(handler, args) \
@@ -112,14 +96,6 @@ protected:
             std::forward<Args>(args)...);
     }
 
-    /// Bind a method in the derived class.
-    template <class Session, typename Handler, typename... Args>
-    auto bind(Handler&& handler, Args&&... args) ->
-        decltype(BOUND_SESSION_TYPE(handler, args))
-    {
-        return BOUND_SESSION(handler, args);
-    }
-
     /////// Dispatch a concurrent method in the derived class.
     ////template <class Session, typename Handler, typename... Args>
     ////void concurrent(Handler&& handler, Args&&... args)
@@ -164,15 +140,6 @@ protected:
     const settings& settings_;
 
 private:
-
-    /// Bind a method in the base class.
-    template <typename Handler, typename... Args>
-    auto base_bind(Handler&& handler, Args&&... args) ->
-        decltype(BOUND_BASE_TYPE(handler, args))
-    {
-        return BOUND_BASE(handler, args);
-    }
-
     // Socket creators.
     void do_stop_acceptor(const code& ec, acceptor::ptr connect);
     void do_stop_connector(const code& ec, SharedConnector connect);
@@ -216,34 +183,12 @@ private:
     pending_channels pending_;
 };
 
-// Base session type.
-
-#undef BASE_ARGS
-#undef BOUND_BASE
-#undef BASE_ARGS_TYPE
-#undef BOUND_BASE_TYPE
-
 // Derived session types.
 
 #undef SESSION_ARGS
 #undef BOUND_SESSION
 #undef SESSION_ARGS_TYPE
 #undef BOUND_SESSION_TYPE
-
-#define BIND1(method, p1) \
-    bind<CLASS>(&CLASS::method, p1)
-#define BIND2(method, p1, p2) \
-    bind<CLASS>(&CLASS::method, p1, p2)
-#define BIND3(method, p1, p2, p3) \
-    bind<CLASS>(&CLASS::method, p1, p2, p3)
-#define BIND4(method, p1, p2, p3, p4) \
-    bind<CLASS>(&CLASS::method, p1, p2, p3, p4)
-#define BIND5(method, p1, p2, p3, p4, p5) \
-    bind<CLASS>(&CLASS::method, p1, p2, p3, p4, p5)
-#define BIND6(method, p1, p2, p3, p4, p5, p6) \
-    bind<CLASS>(&CLASS::method, p1, p2, p3, p4, p5, p6)
-#define BIND7(method, p1, p2, p3, p4, p5, p6, p7) \
-    bind<CLASS>(&CLASS::method, p1, p2, p3, p4, p5, p6, p7)
 
 #define CONCURRENT2(method, p1, p2) \
     concurrent_delegate<CLASS>(&CLASS::method, p1, p2)

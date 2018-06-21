@@ -80,7 +80,10 @@ void protocol_header_sync::start(event_handler handler)
     auto complete = synchronize(BIND2(headers_complete, _1, handler), 1, NAME);
     protocol_timer::start(expiry_interval, BIND2(handle_event, _1, complete));
 
-    SUBSCRIBE3(headers, handle_receive, _1, _2, complete);
+	subscribe<headers>([self = shared_from_base<protocol_header_sync>(), complete]
+		(const code& ec, headers_ptr message) {
+			return self->handle_receive(ec, message, complete);
+		});
 
     log::trace(LOG_NODE) << "begin to sync header";
     // This is the end of the start sequence.
@@ -101,7 +104,10 @@ void protocol_header_sync::send_get_headers(event_handler complete)
         last_.hash()
     };
     log::trace(LOG_NODE) << "send get headers, [" << encode_hash(hashes_.last_hash()) << "], stop hash[" << encode_hash(last_.hash()) << ']';
-    SEND2(request, handle_send, _1, complete);
+	send(request, [=, self = shared_from_base<protocol_header_sync>()]
+		(const code& ec) {
+			return self->handle_send(ec, complete);
+		});
 }
 
 void protocol_header_sync::handle_send(const code& ec, event_handler complete)

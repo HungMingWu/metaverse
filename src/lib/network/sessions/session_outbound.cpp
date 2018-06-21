@@ -95,7 +95,11 @@ void session_outbound::new_connection(SharedConnector connect)
     }
     static int i{0};
     int b = i++;
-    this->connect(connect, BIND3(handle_connect, _1, _2, connect));
+	auto handle_connect = [=, self = shared_from_base<session_outbound>()]
+		(const code& ec, channel::ptr channel) {
+			return self->handle_connect(ec, channel, connect);
+		};
+    this->connect(connect, handle_connect);
 }
 
 void session_outbound::delay_new_connect(SharedConnector connect)
@@ -162,9 +166,17 @@ void session_outbound::handle_connect(const code& ec, channel::ptr channel,
     log::trace(LOG_NETWORK)
         << "Connected to outbound channel [" << channel->authority() << "]";
     ++outbound_counter;
-    register_channel(channel, 
-        BIND3(handle_channel_start, _1, connect, channel),
-        BIND3(handle_channel_stop, _1, connect, channel));
+	auto handle_started = [=, self = shared_from_base<session_outbound>()]
+		(const code& ec) {
+		return self->handle_channel_start(ec, connect, channel);
+		};
+	auto handle_stopped = [=, self = shared_from_base<session_outbound>()]
+		(const code& ec) {
+			return self->handle_channel_stop(ec, connect, channel);
+		};
+	register_channel(channel,
+		handle_started,
+		handle_stopped);
 }
 
 void session_outbound::handle_channel_start(const code& ec,

@@ -65,15 +65,30 @@ protocol_block_out::ptr protocol_block_out::do_subscribe()
     {
         // Send headers vs. inventory anncements if headers_to_peer_ is set.
         log::trace(LOG_NODE) << "protocol block out headers to peer" ;
-        SUBSCRIBE2(send_headers, handle_receive_send_headers, _1, _2);
+		subscribe<send_headers>([self = shared_from_base<protocol_block_out>()]
+			(const code& ec, send_headers_ptr message) {
+				return self->handle_receive_send_headers(ec, message);
+			});
     }
 
     // TODO: move get_headers to a derived class protocol_block_out_31800.
-    SUBSCRIBE2(get_headers, handle_receive_get_headers, _1, _2);
-    SUBSCRIBE2(get_blocks, handle_receive_get_blocks, _1, _2);
-    SUBSCRIBE2(get_data, handle_receive_get_data, _1, _2);
+	subscribe<get_headers>([self = shared_from_base<protocol_block_out>()]
+		(const code& ec, get_headers_ptr message) {
+			return self->handle_receive_get_headers(ec, message);
+		});
+	subscribe<get_blocks>([self = shared_from_base<protocol_block_out>()]
+		(const code& ec, get_blocks_ptr message) {
+			return self->handle_receive_get_blocks(ec, message);
+		});
+	subscribe<get_data>([self = shared_from_base<protocol_block_out>()]
+		(const code& ec, get_data_ptr message) {
+			return self->handle_receive_get_data(ec, message);
+		});
 
-    protocol_events::start(BIND1(handle_stop, _1));
+	protocol_events::start([self = shared_from_base<protocol_block_out>()]
+		(const code& ec) {
+			return self->handle_stop(ec);
+		});
     return std::dynamic_pointer_cast<protocol_block_out>(protocol::shared_from_this());
 }
 
@@ -86,8 +101,12 @@ void protocol_block_out::start()
     // TODO: move send_headers to a derived class protocol_block_out_70012.
 
     // Subscribe to block acceptance notifications (our heartbeat).
-    blockchain_.subscribe_reorganize(
-        BIND4(handle_reorganized, _1, _2, _3, _4));
+	auto handle_reorganized = [self = shared_from_base<protocol_block_out>()]
+		(const code& ec, size_t fork_point,
+			const block_ptr_list& incoming, const block_ptr_list& outgoing) {
+			return self->handle_reorganized(ec, fork_point, incoming, outgoing);
+		};
+	blockchain_.subscribe_reorganize(handle_reorganized);
     if (channel_stopped()) {
 		blockchain_.fired();
 	}
@@ -186,8 +205,12 @@ bool protocol_block_out::handle_receive_get_headers(const code& ec,
 		auto is_got = blockchain.get_last_height(top);
 		int64_t block_interval = 2000;
 		auto res = static_cast<int64_t>(top) - static_cast<int64_t>(peer_start_height()) - block_interval;
+		auto handle_fetch_locator_headers = [=, self = shared_from_base<protocol_block_out>()]
+			(const code& ec, const header_list& headers) {
+				return self->handle_fetch_locator_headers(ec, headers);
+			};
 		blockchain_.fetch_locator_block_headers(*message, threshold, res>0?locator_cap:10,
-			BIND2(handle_fetch_locator_headers, _1, _2));
+			handle_fetch_locator_headers);
     }
 
     return true;
@@ -218,7 +241,10 @@ void protocol_block_out::handle_fetch_locator_headers(const code& ec,
 
     // Respond to get_headers with headers.
     const message::headers response(headers);
-    SEND2(response, handle_send, _1, response.command);
+	send(response, [self = shared_from_base<protocol_block_out>(), response]
+		(const code& ec) {
+			return self->handle_send(ec, response.command);
+		});
 }
 
 // Receive get_blocks sequence.
@@ -262,8 +288,14 @@ bool protocol_block_out::handle_receive_get_blocks(const code& ec,
 	int64_t block_interval = 2000;
 	auto res = static_cast<int64_t>(top) - static_cast<int64_t>(peer_start_height()) - block_interval;
 
+	auto handle_fetch_locator_hashes = [=, self = shared_from_base<protocol_block_out>()]
+	(const code& ec, const hash_list& hashes)
+	{
+		return self->handle_fetch_locator_hashes(ec, hashes);
+	};
+
     blockchain_.fetch_locator_block_hashes(*message, threshold, res>0?locator_cap:10,
-        BIND2(handle_fetch_locator_hashes, _1, _2));
+        handle_fetch_locator_hashes);
     return true;
 }
 
@@ -284,7 +316,10 @@ void protocol_block_out::handle_fetch_locator_hashes(const code& ec,
 
     // Respond to get_blocks with inventory.
     const inventory response(hashes, inventory::type_id::block);
-    SEND2(response, handle_send, _1, response.command);
+	send(response, [self = shared_from_base<protocol_block_out>(), response]
+		(const code& ec) {
+			return self->handle_send(ec, response.command);
+		});
 
     // Save the locator top to limit an overlapping future request.
     if(! hashes.empty())
@@ -316,12 +351,20 @@ bool protocol_block_out::handle_receive_get_data(const code& ec,
     // Ignore non-block inventory requests in this protocol.
     for (const auto& inventory: message->inventories)
     {
-        if (inventory.type == inventory::type_id::block)
-            blockchain_.fetch_block(inventory.hash,
-                BIND3(send_block, _1, _2, inventory.hash));
-        else if (inventory.type == inventory::type_id::filtered_block)
-            blockchain_.fetch_merkle_block(inventory.hash,
-                BIND3(send_merkle_block, _1, _2, inventory.hash));
+		if (inventory.type == inventory::type_id::block) {
+			auto send_block_ = [=, self = shared_from_base<protocol_block_out>()]
+				(const code& ec, chain::block::ptr block) {
+					return self->send_block(ec, block, inventory.hash);
+				};
+			blockchain_.fetch_block(inventory.hash, send_block_);
+		}
+		else if (inventory.type == inventory::type_id::filtered_block) {
+			auto send_merkle_block_ = [=, self = shared_from_base<protocol_block_out>()]
+				(const code& ec, merkle_block_ptr block) {
+					return self->send_merkle_block(ec, block, inventory.hash);
+				};
+			blockchain_.fetch_merkle_block(inventory.hash, send_merkle_block_);
+		}
     }
 
     return true;
@@ -342,7 +385,11 @@ void protocol_block_out::send_block(const code& ec, chain::block::ptr block,
             << "Block requested by [" << authority() << "] not found." << encode_hash(hash);
 
         const not_found reply{ { inventory::type_id::block, hash } };
-        SEND2(reply, handle_send, _1, reply.command);
+		send(reply, [self = shared_from_base<protocol_block_out>(), reply]
+			(const code& ec) {
+				return self->handle_send(ec, reply.command);
+			});
+
         return;
     }
 
@@ -356,7 +403,10 @@ void protocol_block_out::send_block(const code& ec, chain::block::ptr block,
     }
 
     // TODO: eliminate copy.
-    SEND2(block_message(*block), handle_send, _1, block_message::command);
+	send(block_message(*block), [self = shared_from_base<protocol_block_out>()]
+		(const code& ec) {
+			return self->handle_send(ec, block_message::command);
+		});
 }
 
 // TODO: move filtered_block to derived class protocol_block_out_70001.
@@ -372,7 +422,10 @@ void protocol_block_out::send_merkle_block(const code& ec,
             << "Merkle block requested by [" << authority() << "] not found.";
 
         const not_found reply{ { inventory::type_id::filtered_block, hash } };
-        SEND2(reply, handle_send, _1, reply.command);
+		send(reply, [self = shared_from_base<protocol_block_out>(), reply]
+			(const code& ec) {
+				return self->handle_send(ec, reply.command);
+			});
         return;
     }
 
@@ -385,7 +438,10 @@ void protocol_block_out::send_merkle_block(const code& ec,
         return;
     }
 
-    SEND2(*message, handle_send, _1, message->command);
+	send(*message, [self = shared_from_base<protocol_block_out>(), message]
+		(const code& ec) {
+			return self->handle_send(ec, message->command);
+		});
 }
 
 // Subscription.
@@ -437,7 +493,10 @@ bool protocol_block_out::handle_reorganized(const code& ec, size_t fork_point,
 			{
 				return true;
 			}
-            SEND2(announcement, handle_send, _1, announcement.command);
+			send(announcement, [=, self = shared_from_base<protocol_block_out>()]
+				(const code& ec) {
+					return self->handle_send(ec, announcement.command);
+				});
         }
         return true;
     }
@@ -460,7 +519,10 @@ bool protocol_block_out::handle_reorganized(const code& ec, size_t fork_point,
 		{
 			return true;
 		}
-        SEND2(announcement, handle_send, _1, announcement.command);
+		send(announcement, [self = shared_from_base<protocol_block_out>(), announcement]
+			(const code& ec) {
+				return self->handle_send(ec, announcement.command);
+			});
     }
     return true;
 }

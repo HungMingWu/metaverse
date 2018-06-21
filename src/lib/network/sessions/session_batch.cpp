@@ -89,7 +89,10 @@ void session_batch::connect(SharedConnector connect, channel_handler handler)
     // synchronizer state.
     const auto mutex = std::make_shared<upgrade_mutex>();
     const auto counter = std::make_shared<atomic_counter>(0);
-    const auto singular = BIND5(converge, _1, _2, counter, mutex, handler);
+	auto singular = [=, self = shared_from_base<session_batch>()]
+		(const code& ec, channel::ptr channel) {
+			return self->converge(ec, channel, counter, mutex, handler);
+		};
 
     for (uint32_t host = 0; host < batch_size_; ++host)
         new_connect(connect, counter, singular);
@@ -107,7 +110,11 @@ void session_batch::new_connect(SharedConnector connect,
 
     if (counter->load() == batch_size_)
         return;
-    fetch_address(BIND5(start_connect, _1, _2, connect, counter, handler));
+	auto connectFunc = [=, self = shared_from_base<session_batch>()]
+		(const code& ec, const authority& host) {
+			return self->start_connect(ec, host, connect, counter, handler);
+		};
+    fetch_address(connectFunc);
 }
 
 void session_batch::start_connect(const code& ec, const authority& host,
@@ -136,8 +143,12 @@ void session_batch::start_connect(const code& ec, const authority& host,
         << "Connecting to [" << host << "]";
 
     // CONNECT
-    connect->connect(host, BIND7(handle_connect, _1, _2, host, connect,
-        counter, 3, handler));
+	auto connectFunc = [=, self = shared_from_base<session_batch>()]
+		(const code& ec, channel::ptr channel) {
+			return self->handle_connect(ec, channel, host, connect,
+				counter, 3, handler);
+		};
+    connect->connect(host, connectFunc);
 }
 
 void session_batch::handle_connect(const code& ec, channel::ptr channel,

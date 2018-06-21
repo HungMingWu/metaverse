@@ -50,7 +50,11 @@ void protocol_timer::start(const asio::duration& timeout,
 {
     // The deadline timer is thread safe.
     timer_ = std::make_shared<deadline>(pool(), timeout);
-    protocol_events::start(BIND2(handle_notify, _1, handle_event));
+	auto handle_notify = [=, self = shared_from_base<protocol_timer>()](const code& ec)
+	{
+		return self->handle_notify(ec, handle_event);
+	};
+    protocol_events::start(handle_notify);
     reset_timer();
 }
 
@@ -71,7 +75,10 @@ void protocol_timer::reset_timer()
     if (stopped())
         return;
 
-    timer_->start(BIND1(handle_timer, _1));
+	timer_->start([self = shared_from_base<protocol_timer>()]
+		(const code& ec) {
+			return self->handle_timer(ec);
+		});
     if (stopped())
     {
     	timer_->stop();

@@ -53,10 +53,22 @@ protocol_transaction_out::protocol_transaction_out(p2p& network,
 
 protocol_transaction_out::ptr protocol_transaction_out::do_subscribe()
 {
-    SUBSCRIBE2(memory_pool, handle_receive_memory_pool, _1, _2);
-    SUBSCRIBE2(fee_filter, handle_receive_fee_filter, _1, _2);
-    SUBSCRIBE2(get_data, handle_receive_get_data, _1, _2);
-    protocol_events::start(BIND1(handle_stop, _1));
+	subscribe<memory_pool>([self = shared_from_base<protocol_transaction_out>()]
+		(const code& ec, memory_pool_ptr message) {
+			return self->handle_receive_memory_pool(ec, message);
+		});
+	subscribe<fee_filter>([self = shared_from_base<protocol_transaction_out>()]
+		(const code& ec, fee_filter_ptr message) {
+			return self->handle_receive_fee_filter(ec, message);
+		});
+	subscribe<get_data>([self = shared_from_base<protocol_transaction_out>()]
+		(const code& ec, get_data_ptr message) {
+			return self->handle_receive_get_data(ec, message);
+		});
+	protocol_events::start([self = shared_from_base<protocol_transaction_out>()]
+		(const code& ec) {
+			return self->handle_stop(ec);
+		});
     return std::dynamic_pointer_cast<protocol_transaction_out>(protocol::shared_from_this());
 }
 
@@ -72,7 +84,12 @@ void protocol_transaction_out::start()
     if (relay_to_peer_)
     {
         // Subscribe to transaction pool notifications and relay txs.
-        pool_.subscribe_transaction(BIND3(handle_floated, _1, _2, _3));
+		auto handle_floated = [=, self = shared_from_base<protocol_transaction_out>()]
+			(const code& ec,
+				const index_list& unconfirmed, transaction_ptr message) {
+			return self->handle_floated(ec, unconfirmed, message);
+		};
+		pool_.subscribe_transaction(handle_floated);
         if (channel_stopped()) {
 			pool_.fired();
 		}
@@ -139,7 +156,11 @@ bool protocol_transaction_out::handle_receive_memory_pool(const code& ec,
         for(auto& t:txs) {
             hashes.push_back(t->hash());
         }
-        send<protocol_transaction_out>(inventory{hashes, inventory::type_id::transaction}, &protocol_transaction_out::handle_send, _1, inventory::command);
+		send(inventory{ hashes, inventory::type_id::transaction }, 
+			[self = std::static_pointer_cast<protocol_transaction_out>(self)]
+			(const code& ec) {
+				return self->handle_send(ec, inventory::command);
+			});
     });
     return false;
 }
@@ -178,8 +199,11 @@ bool protocol_transaction_out::handle_receive_get_data(const code& ec,
                 send_transaction(ec, t, inv.hash);
                 if(ec)
                 {
-                    blockchain_.fetch_transaction(inv.hash,
-                    BIND3(send_transaction, _1, _2, inv.hash));
+					auto send_transaction_ = [=, self = std::static_pointer_cast<protocol_transaction_out>(pThis)]
+						(const code& ec, const chain::transaction& transaction) {
+							return self->send_transaction(ec, transaction, inv.hash);
+						};
+					blockchain_.fetch_transaction(inv.hash, send_transaction_);
                 }
             });
         }
@@ -216,8 +240,10 @@ void protocol_transaction_out::send_transaction(const code& ec,
     log::trace(LOG_NODE) << "send transaction " << encode_hash(transaction.hash()) << ", to " << authority();
 
     // TODO: eliminate copy.
-    SEND2(transaction_message(transaction), handle_send, _1,
-        transaction_message::command);
+	send(transaction_message(transaction), [self = shared_from_base<protocol_transaction_out>()]
+		(const code& ec) {
+			return self->handle_send(ec, transaction_message::command);
+		});
 }
 
 // Subscription.
@@ -250,7 +276,10 @@ bool protocol_transaction_out::handle_floated(const code& ec,
         static const auto id = inventory::type_id::transaction;
         const inventory announcement{ { id, message->hash() } };
         log::trace(LOG_NODE) << "handle floated send transaction hash," << encode_hash(message->hash()) ;
-        SEND2(announcement, handle_send, _1, announcement.command);
+		send(announcement, [=, self = shared_from_base<protocol_transaction_out>()]
+			(const code& ec) {
+				return self->handle_send(ec, announcement.command);
+			});
     }
 
     return true;

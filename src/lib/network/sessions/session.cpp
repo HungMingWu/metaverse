@@ -122,7 +122,11 @@ void session::store(const message::network_address& address)
 acceptor::ptr session::create_acceptor()
 {
     const auto accept = std::make_shared<acceptor>(pool_, settings_);
-    subscribe_stop(BIND_2(do_stop_acceptor, _1, accept));
+	auto do_stop_acceptor = [=, self = shared_from_this()]
+		(const code& cv) {
+			return self->do_stop_acceptor(cv, accept);
+		};
+    subscribe_stop(do_stop_acceptor);
     return accept;
 }
 
@@ -135,7 +139,10 @@ void session::do_stop_acceptor(const code&, acceptor::ptr accept)
 SharedConnector session::create_connector()
 {
     const auto connect = std::make_shared<connector>(pool_, settings_);
-    subscribe_stop(BIND_2(do_stop_connector, _1, connect));
+	auto do_stop_connector = [=, self = shared_from_this()](const code& ec) {
+		return self->do_stop_connector(ec, connect);
+	};
+	subscribe_stop(do_stop_connector);
     return connect;
 }
 
@@ -157,7 +164,10 @@ void session::start(result_handler handler)
     }
 
     stopped_ = false;
-    subscribe_stop(BIND_1(do_stop_session, _1));
+	auto do_stop_session = [=, self = shared_from_this()](const code& ec) {
+		return self->do_stop_session(ec);
+	};
+    subscribe_stop(do_stop_session);
 
     // This is the end of the start sequence.
     handler(error::success);
@@ -191,11 +201,13 @@ void session::subscribe_stop(result_handler handler)
 void session::register_channel(channel::ptr channel,
     result_handler handle_started, result_handler handle_stopped)
 {
-    result_handler stop_handler =
-        BIND_3(do_remove, _1, channel, handle_stopped);
+	auto stop_handler = [=, self = shared_from_this()](const code& ec) {
+		return self->do_remove(ec, channel, handle_stopped);
+	};
 
-    result_handler start_handler =
-        BIND_4(handle_start, _1, channel, handle_started, stop_handler);
+	auto start_handler = [=, self = shared_from_this()](const code& ec) {
+		return self->handle_start(ec, channel, handle_started, stop_handler);
+	};
 
     if (stopped())
     {
@@ -212,11 +224,14 @@ void session::register_channel(channel::ptr channel,
     channel->set_notify(notify_);
     channel->set_nonce(nonzero_pseudo_random());
 
-    result_handler unpend_handler =
-        BIND_3(do_unpend, _1, channel, start_handler);
+	auto unpend_handler = [=, self = shared_from_this()](const code& ec) {
+		return self->do_unpend(ec, channel, start_handler);
+	};
+	auto handle_pend = [=, self = shared_from_this()](const code& ec) {
+		return self->handle_pend(ec, channel, unpend_handler);
+	};
 
-    pending_.store(channel,
-        BIND_3(handle_pend, _1, channel, unpend_handler));
+	pending_.store(channel, handle_pend);
 }
 
 void session::handle_pend(const code& ec, channel::ptr channel,
@@ -229,8 +244,10 @@ void session::handle_pend(const code& ec, channel::ptr channel,
     }
 
     // The channel starts, invokes the handler, then starts the read cycle.
-    channel->start(
-        BIND_3(handle_channel_start, _1, channel, handle_started));
+	auto handle_channel_start = [=, self = shared_from_this()](const code& ec) {
+		return self->handle_channel_start(ec, channel, handle_started);
+	};
+	channel->start(handle_channel_start);
 }
 
 void session::handle_channel_start(const code& ec, channel::ptr channel,
@@ -245,8 +262,9 @@ void session::handle_channel_start(const code& ec, channel::ptr channel,
         return;
     }
 
-    result_handler handshake_handler =
-        BIND_3(handle_handshake, _1, channel, handle_started);
+	auto handshake_handler = [=, self = shared_from_this()](const code& ec) {
+		return self->handle_handshake(ec, channel, handle_started);
+	};
 
     attach_handshake_protocols(channel, handshake_handler);
 }
@@ -270,8 +288,10 @@ void session::handle_handshake(const code& ec, channel::ptr channel,
         return;
     }
 
-    truth_handler handler = 
-        BIND_3(handle_is_pending, _1, channel, handle_started);
+	auto handler = [=, self = shared_from_this()]
+		(bool pending) {
+			return self->handle_is_pending(pending, channel, handle_started);
+		};
 
     // The loopback test is for incoming channels only.
     if (incoming_)
@@ -327,14 +347,23 @@ void session::handle_start(const code& ec, channel::ptr channel,
 void session::do_unpend(const code& ec, channel::ptr channel,
     result_handler handle_started)
 {
-    pending_.remove(channel, BIND_1(handle_unpend, _1));
+	auto handle_unpend = [=, self = shared_from_this()]
+		(const code& ec) {
+			return self->handle_unpend(ec);
+		};
+
+    pending_.remove(channel, handle_unpend);
     handle_started(ec);
 }
 
 void session::do_remove(const code& ec, channel::ptr channel,
     result_handler handle_stopped)
 {
-    network_.remove(channel, BIND_1(handle_remove, _1));
+	auto handle_remove = [=, self = shared_from_this()]
+		(const code& ec) {
+			return self->handle_remove(ec);
+		};
+    network_.remove(channel, handle_remove);
     handle_stopped(ec);
 }
 

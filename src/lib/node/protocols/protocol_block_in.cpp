@@ -59,14 +59,31 @@ protocol_block_in::protocol_block_in(p2p& network, channel::ptr channel,
 protocol_block_in::ptr protocol_block_in::do_subscribe()
 {
     // TODO: move headers to a derived class protocol_block_in_31800.
-    SUBSCRIBE2(headers, handle_receive_headers, _1, _2);
+	subscribe<headers>([self = shared_from_base<protocol_block_in>()]
+		(const code& ec, headers_ptr message) {
+			return self->handle_receive_headers(ec, message);
+		});
 
     // TODO: move not_found to a derived class protocol_block_in_70001.
-    SUBSCRIBE2(not_found, handle_receive_not_found, _1, _2);
+	subscribe<not_found>([self = shared_from_base<protocol_block_in>()]
+		(const code& ec, message::not_found::ptr message) {
+			return self->handle_receive_not_found(ec, message);
+		});
 
-    SUBSCRIBE2(inventory, handle_receive_inventory, _1, _2);
-    SUBSCRIBE2(block_message, handle_receive_block, _1, _2);
-    protocol_timer::start(get_blocks_interval, BIND1(get_block_inventory, _1));
+	subscribe<inventory>([self = shared_from_base<protocol_block_in>()]
+		(const code& ec, inventory_ptr message) {
+			return self->handle_receive_inventory(ec, message);
+		});
+	subscribe<block_message>([self = shared_from_base<protocol_block_in>()]
+		(const code& ec, block_ptr message) {
+			return self->handle_receive_block(ec, message);
+		});
+
+	protocol_timer::start(get_blocks_interval, 
+		[self = shared_from_base<protocol_block_in>()]
+		(const code& ec) {
+			return self->get_block_inventory(ec);
+		});
     return std::dynamic_pointer_cast<protocol_block_in>(protocol::shared_from_this());
 }
 
@@ -85,8 +102,12 @@ void protocol_block_in::start()
     }
 
     // Subscribe to block acceptance notifications (for gap fill redundancy).
-    blockchain_.subscribe_reorganize(
-        BIND4(handle_reorganized, _1, _2, _3, _4));
+	auto handle_reorganized = [self = shared_from_base<protocol_block_in>()]
+		(const code& ec, size_t fork_point,
+			const block_ptr_list& incoming, const block_ptr_list& outgoing) {
+			return self->handle_reorganized(ec, fork_point, incoming, outgoing);
+		};
+    blockchain_.subscribe_reorganize(handle_reorganized);
     if (channel_stopped()) {
 		blockchain_.fired();
 	}
@@ -149,9 +170,12 @@ void protocol_block_in::send_get_blocks(const hash_digest& stop_hash)
 
     // Avoid requesting from the same start as last request to this peer.
     // This does not guarantee prevention, it's just an optimization.
-    if (chain_top == null_hash || last_locator_top != chain_top)
-        blockchain_.fetch_block_locator(
-            BIND3(handle_fetch_block_locator, _1, _2, stop_hash));
+	auto handle_fetch_block_locator = [=, self = shared_from_base<protocol_block_in>()]
+		(const code& ec, const hash_list& locator) {
+			return self->handle_fetch_block_locator(ec, locator, stop_hash);
+		};
+	if (chain_top == null_hash || last_locator_top != chain_top)
+		blockchain_.fetch_block_locator(handle_fetch_block_locator);
 }
 
 void protocol_block_in::send_get_blocks(const hash_digest& from_hash, const hash_digest& to_hash)
@@ -187,12 +211,18 @@ void protocol_block_in::handle_fetch_block_locator(const code& ec,
     if (headers_from_peer_)
     {
         const get_headers request{ std::move(locator), stop_hash };
-        SEND2(request, handle_send, _1, request.command);
+		send(request, [self = shared_from_base<protocol_block_in>(), request]
+			(const code& ec) {
+				return self->handle_send(ec, request.command);
+			});
     }
     else
     {
         const get_blocks request{ std::move(locator), stop_hash };
-        SEND2(request, handle_send, _1, request.command);
+		send(request, [self = shared_from_base<protocol_block_in>(), request]
+			(const code& ec) {
+				return self->handle_send(ec, request.command);
+			});
     }
 
     // Save the locator top to prevent a redundant future request.
@@ -226,8 +256,11 @@ bool protocol_block_in::handle_receive_headers(const code& ec,
     log::trace(LOG_NODE) << "protocol_block_in handle_receive_headers size," << message->elements.size();
 
     // Remove block hashes found in the orphan pool.
-    blockchain_.filter_orphans(response,
-        BIND2(handle_filter_orphans, _1, response));
+	auto handle_filter_orphans = [=, self = shared_from_base<protocol_block_in>()](const code& ec)
+	{
+		return self->handle_filter_orphans(ec, response);
+	};
+	blockchain_.filter_orphans(response, handle_filter_orphans);
     return true;
 }
 
@@ -259,8 +292,11 @@ bool protocol_block_in::handle_receive_inventory(const code& ec,
     }
 
     // Remove block hashes found in the orphan pool.
-    blockchain_.filter_orphans(response,
-        BIND2(handle_filter_orphans, _1, response));
+	auto handle_filter_orphans = [=, self = shared_from_base<protocol_block_in>()](const code& ec)
+	{
+		return self->handle_filter_orphans(ec, response);
+	};
+	blockchain_.filter_orphans(response, handle_filter_orphans);
     return true;
 }
 
@@ -281,7 +317,11 @@ void protocol_block_in::handle_filter_orphans(const code& ec,
     }
 
     // Remove block hashes found in the blockchain (dups not allowed).
-    blockchain_.filter_blocks(message, BIND2(send_get_data, _1, message));
+	auto send_get_data = [=, self = shared_from_base<protocol_block_in>()]
+		(const code& ec) {
+			return self->send_get_data(ec, message);
+		};
+	blockchain_.filter_blocks(message, send_get_data);
 }
 
 void protocol_block_in::send_get_data(const code& ec, get_data_ptr message)
@@ -302,7 +342,10 @@ void protocol_block_in::send_get_data(const code& ec, get_data_ptr message)
     headers_batch_size_ += message->inventories.size();
 
     // inventory|headers->get_data[blocks]
-    SEND2(*message, handle_send, _1, message->command);
+	send(*message, [self = shared_from_base<protocol_block_in>(), message]
+		(const code& ec) {
+			return self->handle_send(ec, message->command);
+		});
 }
 
 // Receive not_found sequence.
@@ -374,7 +417,12 @@ bool protocol_block_in::handle_receive_block(const code& ec, block_ptr message)
 
     log::trace(LOG_NODE) << "from " << authority() << ",receive block hash," << encode_hash(message->header.hash()) << ",tx-size," << message->header.transaction_count << ",number," << message->header.number ;
 
-    blockchain_.store(message, BIND2(handle_store_block, _1, message));
+	auto handle_store_block = [=, self = shared_from_base<protocol_block_in>()]
+	(const code& ec, uint64_t)
+	{
+		return self->handle_store_block(ec, message);
+	};
+    blockchain_.store(message, handle_store_block);
     return true;
 }
 

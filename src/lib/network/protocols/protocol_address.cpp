@@ -45,10 +45,21 @@ protocol_address::protocol_address(p2p& network, channel::ptr channel)
 
 protocol_address::ptr protocol_address::do_subscribe()
 {
-    SUBSCRIBE2(address, handle_receive_address, _1, _2);
-    SUBSCRIBE2(get_address, handle_receive_get_address, _1, _2);
+	subscribe<address>([self = shared_from_base<protocol_address>()]
+		(const code& ec, address::ptr message) {
+			return self->handle_receive_address(ec, message);
+		});
+
+	subscribe<get_address>([self = shared_from_base<protocol_address>()]
+		(const code& ec, get_address::ptr message) {
+			return self->handle_receive_get_address(ec, message);
+		});
+
     // Must have a handler to capture a shared self pointer in stop subscriber.
-    protocol_events::start(BIND1(handle_stop, _1));
+	protocol_events::start([self = shared_from_base<protocol_address>()]
+		(const code& ec) {
+			return self->handle_stop(ec);
+		});
     return std::dynamic_pointer_cast<protocol_address>(protocol::shared_from_this());
 }
 
@@ -66,12 +77,18 @@ void protocol_address::start()
         //for testnet don't filter local ip
         if (settings.hosts_file == "hosts-test.cache") {
             self_ = address({ { nt_address } });
-            SEND2(self_, handle_send, _1, self_.command);
+			send(self_, [=, self = shared_from_base<protocol_address>()]
+				(const code& ec) {
+					return self->handle_send(ec, self_.command);
+				});
         }
         //only outer address can be broadcast
         else if (!nt_address.is_private_network()) {
             self_ = address({ { nt_address } });
-            SEND2(self_, handle_send, _1, self_.command);
+			send(self_, [=, self = shared_from_base<protocol_address>()]
+				(const code& ec) {
+					return self->handle_send(ec, self_.command);
+				});
         }
         
     }
@@ -84,14 +101,20 @@ void protocol_address::start()
             const config::authority& out_address = *sp_out_address;
             network_address nt_address = out_address.to_network_address();
             if (settings.hosts_file == "hosts-test.cache") {
-                address self = address({ { nt_address } });
+                address addr = address({ { nt_address } });
                 log::info("UPnP") << "send addresss " << out_address.to_string();
-                SEND2(self, handle_send, _1, self.command);
+				send(addr, [=, self = shared_from_base<protocol_address>()]
+					(const code& ec) {
+						return self->handle_send(ec, addr.command);
+					});
             }
             else if (!nt_address.is_private_network()) {
-                address self = address({ { nt_address } });
+                address addr = address({ { nt_address } });
                 log::info("UPnP") << "send addresss " << out_address.to_string();
-                SEND2(self, handle_send, _1, self.command);
+				send(addr, [=, self = shared_from_base<protocol_address>()]
+					(const code& ec) {
+						return self->handle_send(ec, addr.command);
+					});
             }
         }
     }
@@ -103,7 +126,10 @@ void protocol_address::start()
     if (settings.host_pool_capacity == 0)
         return;
 
-    SEND2(get_address(), handle_send, _1, get_address::command);
+	send(get_address(), [self = shared_from_base<protocol_address>()]
+		(const code& ec) {
+			return self->handle_send(ec, get_address::command);
+		});
 }
 
 void protocol_address::remove_useless_address(address::ptr& message)
@@ -164,7 +190,11 @@ bool protocol_address::handle_receive_address(const code& ec,
     }
 
     // TODO: manage timestamps (active channels are connected < 3 hours ago).
-    network_.store(addresses, BIND2(handle_store_addresses, _1, message));
+	auto handle_store_addresses = [=, self = shared_from_base<protocol_address>()]
+	(const code& ec) {
+		return self->handle_store_addresses(ec, message);
+	};
+    network_.store(addresses, handle_store_addresses);
 
     // RESUBSCRIBE
     return true;
@@ -216,7 +246,10 @@ bool protocol_address::handle_receive_get_address(const code& ec,
         << "Sending addresses to [" << authority() << "] ("
         << address_list.size() << ")";
     message::address self_address = {address_list};
-    SEND2(self_address, handle_send, _1, self_address.command);
+	send(self_address, [=, self = shared_from_base<protocol_address>()]
+		(const code& ec) {
+			return self->handle_send(ec, self_address.command);
+		});
 
     // RESUBSCRIBE
     return true;

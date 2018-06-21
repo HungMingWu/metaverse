@@ -54,7 +54,9 @@ bool protocol_events::stopped()
 void protocol_events::start(event_handler handler)
 {
     handler_.store(handler);
-    SUBSCRIBE_STOP1(handle_stopped, _1);
+	subscribe_stop([self = shared_from_base<protocol_events>()](const code& ec) {
+		return self->handle_stopped(ec);
+	});
     if (channel_stopped())
     	set_event(error::channel_stopped);
 }

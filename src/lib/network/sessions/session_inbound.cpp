@@ -70,7 +70,10 @@ void session_inbound::handle_started(const code& ec, result_handler handler)
     const auto port = settings_.inbound_port;
 
     // START LISTENING ON PORT
-    accept->listen(port, BIND2(start_accept, _1, accept));
+	auto start_accept = [=, self = shared_from_base<session_inbound>()](const code& ec) {
+		return self->start_accept(ec, accept);
+	};
+    accept->listen(port, start_accept);
 
     // This is the end of the start sequence.
     handler(error::success);
@@ -97,7 +100,10 @@ void session_inbound::start_accept(const code& ec, acceptor::ptr accept)
     }
 
     // ACCEPT THE NEXT INCOMING CONNECTION
-    accept->accept(BIND3(handle_accept, _1, _2, accept));
+	auto handle_accept = [=, self = shared_from_base<session_inbound>()](const code& ec, channel::ptr channel) {
+		return self->handle_accept(ec, channel, accept);
+	};
+    accept->accept(handle_accept);
 }
 
 void session_inbound::handle_accept(const code& ec, channel::ptr channel,
@@ -128,7 +134,11 @@ void session_inbound::handle_accept(const code& ec, channel::ptr channel,
         return;
     }
 
-    connection_count(BIND2(handle_connection_count, _1, channel));
+	auto handle_connection_count_ = [=, self = shared_from_base<session_inbound>()]
+		(size_t connections) {
+			return self->handle_connection_count(connections, channel);
+		};
+    connection_count(handle_connection_count_);
 }
 
 void session_inbound::handle_connection_count(size_t connections,
@@ -148,9 +158,17 @@ void session_inbound::handle_connection_count(size_t connections,
     log::trace(LOG_NETWORK)
         << "Connected inbound channel [" << channel->authority() << "]";
 
+	auto handle_started = [=, self = shared_from_base<session_inbound>()]
+		(const code& ec) {
+			return self->handle_channel_start(ec, channel);
+		};
+	auto handle_stopped = [self = shared_from_base<session_inbound>()]
+		(const code& ec) {
+			return self->handle_channel_stop(ec);
+		};
     register_channel(channel, 
-        BIND2(handle_channel_start, _1, channel),
-        BIND1(handle_channel_stop, _1));
+		handle_started,
+		handle_stopped);
 }
 
 void session_inbound::handle_channel_start(const code& ec,

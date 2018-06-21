@@ -103,7 +103,11 @@ void session_header_sync::new_connection(SharedConnector connect,
     }
 
     // HEADER SYNC CONNECT
-    this->connect(connect, BIND4(handle_connect, _1, _2, connect, handler));
+	auto handle_connect = [=, self = shared_from_base<session_header_sync>()]
+		(const code& ec, channel::ptr channel) {
+			return self->handle_connect(ec, channel, connect, handler);
+		};
+    this->connect(connect, handle_connect);
 }
 
 void session_header_sync::handle_connect(const code& ec, channel::ptr channel,
@@ -126,9 +130,18 @@ void session_header_sync::handle_connect(const code& ec, channel::ptr channel,
     log::debug(LOG_NODE)
         << "Connected to header sync channel [" << channel->authority() << "]";
 
+	auto handle_started = [=, self = shared_from_base<session_header_sync>()]
+		(const code& ec) {
+			return self->handle_channel_start(ec, connect, channel, handler);
+		};
+	auto handle_stopped = [=, self = shared_from_base<session_header_sync>()]
+		(const code& ec) {
+			return self->handle_channel_stop(ec, connect, handler);
+		};
+
     register_channel(channel,
-        BIND4(handle_channel_start, _1, connect, channel, handler),
-        BIND3(handle_channel_stop, _1, connect, handler));
+		handle_started,
+		handle_stopped);
 }
 
 void session_header_sync::attach_handshake_protocols(channel::ptr channel,
@@ -155,8 +168,12 @@ void session_header_sync::attach_protocols(channel::ptr channel,
 {
     attach<protocol_ping>(channel)->start();
 	attach<protocol_address>(channel)->start();
+	auto handle_complete = [=, self = shared_from_base<session_header_sync>()]
+		(const code& ec) {
+			return self->handle_complete(ec, channel, connect, handler);
+		};
 	attach<protocol_header_sync>(channel, hashes_, minimum_rate_, last_)
-		->start(BIND4(handle_complete, _1, channel, connect, handler));
+		->start(handle_complete);
 }
 
 void session_header_sync::handle_complete(const code& ec, channel::ptr channel,
