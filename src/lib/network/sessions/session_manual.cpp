@@ -48,7 +48,11 @@ session_manual::session_manual(p2p& network)
 
 void session_manual::start(result_handler handler)
 {
-    session::start(CONCURRENT2(handle_started, _1, handler));
+	std::function<void(const code&)> handle_started = [handler, self = shared_from_base<session_manual>()]
+		(const code& ec) {
+			return self->handle_started(ec, handler);
+		};
+	session::start(concurrent_delegate(handle_started));
 }
 
 void session_manual::handle_started(const code& ec, result_handler handler)

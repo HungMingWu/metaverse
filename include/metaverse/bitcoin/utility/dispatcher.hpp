@@ -101,16 +101,16 @@ public:
     }
 
     /// Returns a delegate that will post the job via the service.
-    template <typename... Args>
-    auto concurrent_delegate(Args&&... args) ->
-        delegates::concurrent<decltype(BIND_ARGS(args))>
-    {
-        return
-        {
-            BIND_ARGS(args),
-            heap_
-        };
-    }
+	template <typename Handler>
+	auto concurrent_delegate(Handler&& handler) ->
+		delegates::concurrent<Handler>
+	{
+		return
+		{
+			handler,
+			heap_
+		};
+	}
 
     /// Returns a delegate that will post the job via the strand.
     template <typename... Args>

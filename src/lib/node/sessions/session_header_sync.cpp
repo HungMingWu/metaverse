@@ -70,7 +70,11 @@ session_header_sync::session_header_sync(p2p& network, header_queue& hashes,
 
 void session_header_sync::start(result_handler handler)
 {
-    session::start(CONCURRENT2(handle_started, _1, handler));
+	std::function<void(const code&)> handle_started = [handler, self = shared_from_base<session_header_sync>()]
+		(const code& ec) {
+			return self->handle_started(ec, handler);
+		};
+	session::start(concurrent_delegate(handle_started));
 }
 
 void session_header_sync::handle_started(const code& ec,

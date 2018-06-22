@@ -38,22 +38,6 @@
 namespace libbitcoin {
 namespace network {
 
-// Derived session types.
-
-#define SESSION_ARGS(handler, args) \
-    std::forward<Handler>(handler), \
-    shared_from_base<Session>(), \
-    std::forward<Args>(args)...
-#define BOUND_SESSION(handler, args) \
-    std::bind(SESSION_ARGS(handler, args))
-
-#define SESSION_ARGS_TYPE(handler, args) \
-    std::forward<Handler>(handler), \
-    std::shared_ptr<Session>(), \
-    std::forward<Args>(args)...
-#define BOUND_SESSION_TYPE(handler, args) \
-    std::bind(SESSION_ARGS_TYPE(handler, args))
-
 class p2p;
 
 /// Base class for maintaining the lifetime of a channel set, thread safe.
@@ -96,20 +80,13 @@ protected:
             std::forward<Args>(args)...);
     }
 
-    /////// Dispatch a concurrent method in the derived class.
-    ////template <class Session, typename Handler, typename... Args>
-    ////void concurrent(Handler&& handler, Args&&... args)
-    ////{
-    ////    return dispatch_.concurrent(SESSION_ARGS(handler, args));
-    ////}
-
     /// Bind a concurrent delegate to a method in the derived class.
-    template <class Session, typename Handler, typename... Args>
-    auto concurrent_delegate(Handler&& handler, Args&&... args) ->
-        delegates::concurrent<decltype(BOUND_SESSION_TYPE(handler, args))>
-    {
-        return dispatch_.concurrent_delegate(SESSION_ARGS(handler, args));
-    }
+	template <typename Handler>
+	auto concurrent_delegate(Handler&& handler) ->
+		delegates::concurrent<Handler>
+	{
+		return dispatch_.concurrent_delegate(handler);
+	}
 
     /// Properties.
     virtual void address_count(count_handler handler);
@@ -182,17 +159,6 @@ private:
     dispatcher dispatch_;
     pending_channels pending_;
 };
-
-// Derived session types.
-
-#undef SESSION_ARGS
-#undef BOUND_SESSION
-#undef SESSION_ARGS_TYPE
-#undef BOUND_SESSION_TYPE
-
-#define CONCURRENT2(method, p1, p2) \
-    concurrent_delegate<CLASS>(&CLASS::method, p1, p2)
-
 
 } // namespace network
 } // namespace libbitcoin

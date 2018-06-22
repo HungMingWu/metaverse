@@ -57,7 +57,11 @@ void session_seed::start(result_handler handler)
         return;
     }
 
-    session::start(CONCURRENT2(handle_started, _1, handler));
+	std::function<void(const code&)> handle_started = [handler, self = shared_from_base<session_seed>()]
+		(const code& ec) {
+			return self->handle_started(ec, handler);
+		};
+    session::start(concurrent_delegate(handle_started));
 }
 
 void session_seed::restart(result_handler handler)
